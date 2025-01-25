@@ -1,4 +1,4 @@
-Unique ID,Type of the Furniture,Name,Description,Material,Color,Warranty Period (in years),Price (in US dollars),Dimensions in cm (LxWxH),Country of Creation
+ID,Type ,Name,Description,Material,Color,Warranty Period (in years),Price (in US dollars),Dimensions in cm (LxWxH),Country of Creation
 oIEQnb,Chair,Snug Chair,A comfortable fabric chair foldable.,Fabric,Beige,1,263,102x133x117,USA
 oipd0v,Table,Buddy Table,An elegant plastic table with drawers.,Plastic,Beige,2,41,180x77x115,Sweden
 GipL7Y,Sofa,Lush Sofa,A comfortable wood sofa sectional.,Wood,Natural Oak,5,162,69x135x152,Italy

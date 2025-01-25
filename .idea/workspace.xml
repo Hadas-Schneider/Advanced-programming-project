@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="cb63e2fd-7857-44ba-988a-d5f5c1843cd4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Testing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/furniture.py" beforeDir="false" afterPath="$PROJECT_DIR$/furniture.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/furniture_database.csv" beforeDir="false" afterPath="$PROJECT_DIR$/furniture_database.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,8 +38,8 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/hadas/OneDrive/Documents/Uni/HW5&quot;
+    &quot;git-widget-placeholder&quot;: &quot;Classes&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/hadas/OneDrive/Documents/GitHub/Advanced-programming-project&quot;
   }
 }</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

@@ -7,20 +7,31 @@ class Furniture(ABC):
      This class serves as a foundation for all specific furniture types.
      """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple):
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str):
         """
         Initialize a Furniture object.
 
+        :param u_id: Unique id of the furniture
         :param name: Name of the furniture item.
         :param description: A brief description of the item.
+        :param material: Material of the furniture (e.g., wood, plastic).
+        :param color: Color of the furniture.
+        :param wp: Warranty Period (in years) of the furniture.
         :param price: Price of the item in USD.
         :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        :param country: Where the furniture from.
         """
+        self.u_id = u_id
         self.name = name
         self.description = description
+        self.material = material
+        self.color = color
+        self.wp = wp
         self.price = price
         self.dimensions = dimensions
         self.available_quantity = 0
+        self.country = country
         self.type = "Generic"
 
     @abstractmethod
@@ -58,20 +69,24 @@ class Chair(Furniture):
     Represents a Chair.
     """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple, has_armrests: bool, material: str):
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str, has_armrests: bool):
         """
         Initialize a Chair object.
 
-        :param name: Name of the chair.
+        :param u_id: Unique id of the chair.
+        :param name: Name of the chair item.
         :param description: A brief description of the chair.
-        :param price: Price of the chair in USD.
-        :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
-        :param has_armrests: Boolean indicating if the chair has armrests.
         :param material: Material of the chair (e.g., wood, plastic).
+        :param color: Color of the chair.
+        :param wp: Warranty Period (in years) of the chair.
+        :param price: Price of the chair in USD.
+        :param dimensions: Tuple representing the dimensions of the chair (length, width, height) in cm.
+        :param country: Where the furniture from.
+        :param has_armrests: Boolean indicating if the chair has armrests.
         """
-        super().__init__(name, description, price, dimensions)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
         self.has_armrests = has_armrests
-        self.material = material
         self.type = "Chair"
 
     def calculate_discount(self, base_discount: float) -> float:
@@ -95,18 +110,24 @@ class Table(Furniture):
     Represents a Table.
     """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple, shape: str, is_extendable: bool = False):
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str, shape: str, is_extendable: bool = False):
         """
         Initialize a Table object.
 
-        :param name: Name of the table.
+        :param u_id: Unique id of the table.
+        :param name: Name of the table item.
         :param description: A brief description of the table.
-        :param price: Price of the table in USD.
-        :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        :param material: Material of the table (e.g., wood, plastic).
+        :param color: Color of the table.
+        :param wp: Warranty Period (in years) of the table.
+        :param price: Price of the item in USD.
+        :param dimensions: Tuple representing the dimensions of the table (length, width, height) in cm.
+        :param country: Where the table from.
         :param shape: Shape of the table (e.g., rectangular, circular).
         :param is_extendable: Boolean indicating if the table can expand to become larger.
         """
-        super().__init__(name, description, price, dimensions)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
         self.shape = shape  # Shape of the table (e.g., rectangular, circular)
         self.is_extendable = is_extendable  # Indicates if the table can expand
         self.type = "Table"
@@ -128,19 +149,25 @@ class Sofa(Furniture):
     Represents a Sofa.
     """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple, num_seats: int,
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str, num_seats: int,
                  has_recliner: bool):
         """
         Initialize a Sofa object.
 
-        :param name: Name of the sofa.
+        :param u_id: Unique id of the sofa.
+        :param name: Name of the sofa item.
         :param description: A brief description of the sofa.
+        :param material: Material of the sofa (e.g., wood, plastic).
+        :param color: Color of the sofa.
+        :param wp: Warranty Period (in years) of the sofa.
         :param price: Price of the sofa in USD.
-        :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        :param dimensions: Tuple representing the dimensions of the sofa (length, width, height) in cm.
+        :param country: Where the sofa from.
         :param num_seats: Number of seats the sofa has.
         :param has_recliner: Boolean indicating if the sofa has a reclining feature.
         """
-        super().__init__(name, description, price, dimensions)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
         self.num_seats = num_seats  # Number of seats in the sofa
         self.has_recliner = has_recliner  # Whether the sofa has a reclining feature
         self.type = "Sofa"
@@ -166,18 +193,24 @@ class Bed(Furniture):
     Represents a Bed.
     """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple, bed_size: str, has_storage: bool):
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str, bed_size: str, has_storage: bool):
         """
         Initialize a Bed object.
 
-        :param name: Name of the bed.
+        :param u_id: Unique id of the bed.
+        :param name: Name of the furniture bed.
         :param description: A brief description of the bed.
+        :param material: Material of the bed (e.g., wood, plastic).
+        :param color: Color of the bed.
+        :param wp: Warranty Period (in years) of the bed.
         :param price: Price of the bed in USD.
-        :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        :param dimensions: Tuple representing the dimensions of the bed (length, width, height) in cm.
+        :param country: Where the bed from.
         :param bed_size: Size of the bed (e.g., single, double, queen, king).
         :param has_storage: Boolean indicating if the bed includes storage space.
         """
-        super().__init__(name, description, price, dimensions)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
         self.bed_size = bed_size  # Size of the bed (e.g., single, double, queen, king)
         self.has_storage = has_storage  # Whether the bed includes storage space
         self.type = "Bed"
@@ -203,18 +236,24 @@ class Wardrobe(Furniture):
     Represents a Wardrobe.
     """
 
-    def __init__(self, name: str, description: str, price: float, dimensions: tuple, num_doors: int, has_mirror: bool):
+    def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
+                 price: float, dimensions: tuple, country: str, num_doors: int, has_mirror: bool):
         """
         Initialize a Wardrobe object.
 
-        :param name: Name of the wardrobe.
+        :param u_id: Unique id of the wardrobe.
+        :param name: Name of the wardrobe item.
         :param description: A brief description of the wardrobe.
+        :param material: Material of the wardrobe (e.g., wood, plastic).
+        :param color: Color of the wardrobe.
+        :param wp: Warranty Period (in years) of the wardrobe.
         :param price: Price of the wardrobe in USD.
-        :param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        :param dimensions: Tuple representing the dimensions of the wardrobe (length, width, height) in cm.
+        :param country: Where the wardrobe from.
         :param num_doors: Number of doors the wardrobe has.
         :param has_mirror: Boolean indicating if the wardrobe has a mirror.
         """
-        super().__init__(name, description, price, dimensions)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
         self.num_doors = num_doors  # Number of doors in the wardrobe
         self.has_mirror = has_mirror  # Whether the wardrobe has a mirror
         self.type = "Wardrobe"
