@@ -31,7 +31,7 @@ The application is divided into the following components:
 ### 1. Furniture Management
 Base Class: Furniture
 
-Attributes: u_id, name, description, material, color, wp, price, dimensions, country, available_quantity.
+Attributes: u_id, name, description, material, color, wp, price, dimensions, country, available_quantity.<br>
 Abstract method: calculate_discount (overridden in derived classes).<br>
 
 - **Derived Classes:** <br>
