@@ -1,5 +1,4 @@
-from furnitures.furniture import Furniture
-
+from furniture import Furniture
 
 class Inventory:
     """

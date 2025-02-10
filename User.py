@@ -72,9 +72,11 @@ class User:
         """
         Display the user's past orders.
         """
-        if not self.order_history:
-            print(f"{self.name} has no past orders.")
-        else:
-            print(f"Order History for {self.name}:")
-            for order in self.order_history:
-                print(f"- {order}")
+        return [str(order) for order in self.order_history] if self.order_history else ["No past orders."]
+
+        # if not self.order_history:
+        #     print(f"{self.name} has no past orders.")
+        # else:
+        #     print(f"Order History for {self.name}:")
+        #     for order in self.order_history:
+        #         print(f"- {order}")

@@ -99,7 +99,9 @@ class ShoppingCart:
 
         # Step 1: Validate items against inventory
         for item, quantity in self.cart_items.items():
-            available_quantity = inventory.items_by_type[type(item).__name__].get(item.name, item).available_quantity
+            #available_quantity = inventory.items_by_type[type(item).__name__].get(item.name, item).available_quantity
+            available_quantity = inventory.items_by_type.get(type(item).__name__, {}).get(item.name,
+                                                                                          item).available_quantity
             if available_quantity < quantity:
                 print(f"Insufficient stock for {item.name}. Available: {available_quantity}, Requested: {quantity}")
                 return None

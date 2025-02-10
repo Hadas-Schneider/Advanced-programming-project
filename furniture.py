@@ -150,8 +150,7 @@ class Sofa(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, num_seats: int,
-                 has_recliner: bool):
+                 price: float, dimensions: tuple, country: str, num_seats: int, has_recliner: bool):
         """
         Initialize a Sofa object.
 
