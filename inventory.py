@@ -75,6 +75,28 @@ class Inventory:
                     results.append(item)
         return results
 
+    def get_all_items(self):
+        """
+        Returns all items in the inventory, formatted for API output.
+        """
+        all_items = []
+        for furniture_type, items in self.items_by_type.items():
+            for name, item in items.items():
+                all_items.append({
+                    'id': item.u_id,
+                    'name': item.name,
+                    'description': item.description,
+                    'material': item.material,
+                    'color': item.color,
+                    'warranty_period': item.wp,
+                    'price': item.price,
+                    'dimensions': item.dimensions,
+                    'country': item.country,
+                    'type': item.type,
+                    'available_quantity': item.available_quantity
+                })
+        return all_items
+
     def view_inventory(self):
         """
         Display all furniture items grouped by type in the inventory.

@@ -15,27 +15,7 @@ inventory = Inventory()
 users = {}
 
 # df = pd.read_csv("furniture_database.csv")
-# print(df.columns)
-#
-# # def load_furniture_data():
-# #     with open('furniture_database.csv', newline='', encoding='utf-8') as csvfile:
-# #         reader = csv.DictReader(csvfile)
-# #         for row in reader:
-# #             item = Furniture(
-# #                 row['u_id'],
-# #                 row['Name'],
-# #                 row['Description'],
-# #                 row['Material'],
-# #                 row['Color'],
-# #                 int(row['Warranty Period']),
-# #                 float(row['Price (in US dollars)']),
-# #                 tuple(map(int, row['Dimensions'].split('x'))),
-# #                 row['Country of Creation']
-# #             )
-# #             item.available_quantity = int(row.get('Available Quantity', 0))
-# #             inventory.add_item(item)
-# #
-# # load_furniture_data()
+# print(df[['u_id','Type']])
 
 
 def load_furniture_data():
@@ -109,8 +89,10 @@ def load_furniture_data():
 
             item.available_quantity = int(row.get('Available Quantity', 0))
             inventory.add_item(item)
+    return inventory
 
-load_furniture_data()
+inventory = load_furniture_data()
+print(inventory.view_inventory())
 
 @app.route('/')
 def home():
@@ -139,17 +121,26 @@ def login_user():
 
 
 # Get all furniture items
+# @app.route('/furniture', methods=['GET'])
+# def get_furniture():
+#     inventory1 = load_furniture_data()
+#     furniture_items = inventory1.get_all_items()
+#     return jsonify(furniture_items), 200
+
 @app.route('/furniture', methods=['GET'])
 def get_furniture():
-    items = [{
-        'id': item.u_id,
-        'name': item.name,
-        'price': item.price,
-        'available_quantity': item.available_quantity
-    } for type_items in inventory.items_by_type.values() for item in type_items.values()]
-
-    return jsonify(items)
-
+    inventory = load_furniture_data()
+    furniture_list = []
+    for furniture_type, items in inventory.items_by_type.items():
+        for item in items.values():
+            furniture_list.append({
+                "u_id": item.u_id,
+                "Type": furniture_type,
+                "Name": item.name,
+                "Price": item.price,
+                "Available Quantity": item.available_quantity
+            })
+    return jsonify(furniture_list)
 
 # Get a single furniture item by ID
 @app.route('/furniture/<u_id>', methods=['GET'])
