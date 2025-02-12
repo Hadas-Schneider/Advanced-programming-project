@@ -10,7 +10,9 @@ class Inventory:
     def __init__(self):
         """Initialize an empty inventory grouped by furniture type."""
         self.items_by_type = {}  # {type: {name: Furniture}}
-
+    def bla(self):
+        pass
+    
     def add_item(self, item: Furniture):
         """
         Add a furniture item to the inventory or update its quantity if it already exists.
