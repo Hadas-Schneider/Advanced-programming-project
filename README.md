@@ -1,7 +1,7 @@
 # Online Furniture Store 🛋️ - Advanced Programming Project
+-This Project was submitted by Rawad Safiya, Hadas Scheider , Tom Pashinsky and Dana Pugach-
 
-
-Welcome to the Online Furniture Store, a Python-based application that simulates a fully functional e-commerce platform. The application includes inventory management, user profiles, a shopping cart, a checkout process, and order management, all implemented using object-oriented programming (OOP) principles.
+Welcome to our Online Furniture Store, a Python-based application that simulates a fully functional e-commerce platform. The application includes inventory management, user profiles, a shopping cart, a checkout process, and order management, all implemented using object-oriented programming (OOP) principles.
 
 <br> <br>
 
