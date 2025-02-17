@@ -12,10 +12,10 @@ class User:
         """
         Initialize a User object.
 
-        :param name: Full name of the user.
-        :param email: Email address of the user (unique identifier).
-        :param password: Plaintext password for the user.
-        :param address: Shipping address for the user.
+        param name: Full name of the user.
+        param email: Email address of the user (unique identifier).
+        param password: Plaintext password for the user.
+        param address: Shipping address for the user.
         """
         self.name = name
         self.email = email
@@ -29,8 +29,8 @@ class User:
         """
         Hash a plaintext password using SHA-256 with a unique salt.
 
-        :param password: Plaintext password to hash.
-        :return: A tuple of (hashed_password, salt).
+        param password: Plaintext password to hash.
+        return: A tuple of (hashed_password, salt).
         """
         salt = os.urandom(16).hex()  # Generate a random salt
         salted_password = password + salt
@@ -41,8 +41,8 @@ class User:
         """
         Verify if a plaintext password matches the stored hashed password.
 
-        :param password: Plaintext password to verify.
-        :return: True if the password matches, False otherwise.
+        param password: Plaintext password to verify.
+        return: True if the password matches, False otherwise.
         """
         salted_password = password + self.salt
         hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()
@@ -52,8 +52,8 @@ class User:
         """
         Update the user's profile details.
 
-        :param name: New name for the user (optional).
-        :param address: New address for the user (optional).
+        param name: New name for the user (optional).
+        param address: New address for the user (optional).
         """
         if name:
             self.name = name
@@ -64,7 +64,7 @@ class User:
         """
         Add an order to the user's order history.
 
-        :param order: Order object to add.
+        param order: Order object to add.
         """
         self.order_history.append(order)
 

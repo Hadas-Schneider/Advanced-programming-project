@@ -10,14 +10,11 @@ class Inventory:
     def __init__(self):
         """Initialize an empty inventory grouped by furniture type."""
         self.items_by_type = {}  # {type: {name: Furniture}}
-    def bla(self):
-        pass
-    
+
     def add_item(self, item: Furniture):
         """
         Add a furniture item to the inventory or update its quantity if it already exists.
-
-        :param item: The furniture object to be added.
+        param item: The furniture object to be added.
         """
         furniture_type = item.type  # Get the class name as the type
 
@@ -33,8 +30,8 @@ class Inventory:
         """
         Remove a furniture item from the inventory by name and type.
 
-        :param name: Name of the furniture item to remove.
-        :param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
+        param name: Name of the furniture item to remove.
+        param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
             del self.items_by_type[furniture_type][name]
@@ -45,9 +42,9 @@ class Inventory:
         """
         Update the available quantity of a specific furniture item.
 
-        :param name: Name of the furniture item to update.
-        :param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
-        :param quantity: New quantity to set for the item.
+        param name: Name of the furniture item to update.
+        param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
+        param quantity: New quantity to set for the item.
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
             self.items_by_type[furniture_type][name].available_quantity = quantity
@@ -58,8 +55,8 @@ class Inventory:
         """
         Search for all furniture items of a specific type.
 
-        :param furniture_type: Type of the furniture to search for (e.g., "Chair", "Table").
-        :return: List of items matching the type.
+        param furniture_type: Type of the furniture to search for (e.g., "Chair", "Table").
+        return: List of items matching the type.
         """
         return list(self.items_by_type.get(furniture_type, {}).values())
 
@@ -67,8 +64,8 @@ class Inventory:
         """
         Search for furniture items based on given attributes.
 
-        :param filters: Key-value pairs to filter the search (e.g., name='Chair').
-        :return: List of items matching the filters.
+        param filters: Key-value pairs to filter the search (e.g., name='Chair').
+        return: List of items matching the filters.
         """
         results = []
         for type_items in self.items_by_type.values():
@@ -117,8 +114,8 @@ class Inventory:
     def check_low_stock(self, threshold=5):
         """
         Check for items with low stock.
-        :param threshold: Stock quantity threshold.
-        :return: List of low-stock items.
+        param threshold: Stock quantity threshold.
+        return: List of low-stock items.
         """
         low_stock_items = []
         for item_type, type_items in self.items_by_type.items():

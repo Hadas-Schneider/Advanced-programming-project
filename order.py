@@ -11,9 +11,9 @@ class Order:
         """
         Initialize an Order object.
 
-        :param user: User who placed the order.
-        :param items: Dictionary of items in the order {Furniture: quantity}.
-        :param total_price: Total price of the order after discounts.
+        param user: User who placed the order.
+        param items: Dictionary of items in the order {Furniture: quantity}.
+        param total_price: Total price of the order after discounts.
         """
         self.order_id = str(uuid.uuid4())  # Unique identifier for the order
         self.user = user

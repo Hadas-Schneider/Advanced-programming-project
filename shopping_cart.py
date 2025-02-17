@@ -11,7 +11,7 @@ class ShoppingCart:
         """
         Initialize a ShoppingCart object.
 
-        :param user: User object associated with the cart.
+        param user: User object associated with the cart.
         """
         self.user = user
         self.cart_items = {}  # {Furniture: quantity}
@@ -20,8 +20,8 @@ class ShoppingCart:
         """
         Add a furniture item to the cart or update its quantity.
 
-        :param item: Furniture object to add.
-        :param quantity: Quantity of the item to add (default: 1).
+        param item: Furniture object to add.
+        param quantity: Quantity of the item to add (default: 1).
         """
         if item in self.cart_items:
             self.cart_items[item] += quantity
@@ -32,8 +32,8 @@ class ShoppingCart:
         """
         Remove a furniture item or reduce its quantity in the cart.
 
-        :param item: Furniture object to remove.
-        :param quantity: Quantity to remove (default: 1).
+        param item: Furniture object to remove.
+        param quantity: Quantity to remove (default: 1).
         """
         if item in self.cart_items:
             if self.cart_items[item] <= quantity:
@@ -60,7 +60,7 @@ class ShoppingCart:
         """
         Calculate the total price of all items in the cart.
 
-        :return: Total price as a float.
+        return: Total price as a float.
         """
         return sum(item.price * quantity for item, quantity in self.cart_items.items())
 
@@ -68,7 +68,7 @@ class ShoppingCart:
         """
         Apply type-specific discounts to each item and a cart-wide discount if conditions are met.
 
-        :return: Final total price after discounts.
+        return: Final total price after discounts.
         """
         total = 0
 
@@ -92,8 +92,8 @@ class ShoppingCart:
         """
         Perform the checkout process.
 
-        :param inventory: Inventory object to validate and deduct items from.
-        :return: Order object if successful, None if checkout fails.
+        param inventory: Inventory object to validate and deduct items from.
+        return: Order object if successful, None if checkout fails.
         """
         print("\nStarting checkout process...")
 
