@@ -1,6 +1,35 @@
 from abc import ABC, abstractmethod
 
 
+class DiscountStrategy(ABC):
+    """
+    Abstract base class for discount strategies.
+    """
+    @abstractmethod
+    def calculate_discount(self, price: float) -> float:
+        pass
+
+
+class NoDiscount(DiscountStrategy):
+    def calculate_discount(self, price: float) -> float:
+        return 0
+
+
+class HolidayDiscount(DiscountStrategy):
+    def calculate_discount(self, price: float) -> float:
+        return price * 0.15
+
+
+class VIPDiscount(DiscountStrategy):
+    def calculate_discount(self, price: float) -> float:
+        return price * 0.20
+
+
+class ClearanceDiscount(DiscountStrategy):
+    def calculate_discount(self, price: float) -> float:
+        return price * 0.30
+
+
 class Furniture(ABC):
     """
      Base class to represent general furniture items.
@@ -8,7 +37,8 @@ class Furniture(ABC):
      """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str):
+                 price: float, dimensions: tuple, country: str, available_quantity: int = 0,
+                 discount_strategy: DiscountStrategy = NoDiscount()):
         """
         Initialize a Furniture object.
 
@@ -20,7 +50,11 @@ class Furniture(ABC):
         param wp: Warranty Period (in years) of the furniture.
         param price: Price of the item in USD.
         param dimensions: Tuple representing the dimensions (length, width, height) in cm.
+        param available_quantity : int representing the current available quantity of the item.
         param country: Where the furniture from.
+        param type: str representing the item's type.
+        param discount_strategy : representing the discount the item should have.
+
         """
         self.u_id = u_id
         self.name = name
@@ -30,28 +64,23 @@ class Furniture(ABC):
         self.wp = wp
         self.price = price
         self.dimensions = dimensions
-        self.available_quantity = 0
+        self.available_quantity = available_quantity
         self.country = country
         self.type = "Generic"
+        self.discount_strategy = discount_strategy
+
+    def apply_discount(self) -> float:
+        discount = self.discount_strategy.calculate_discount(self.price)
+        return self.price - discount
+
+    def set_discount_strategy(self, discount_strategy: DiscountStrategy):
+        self.discount_strategy = discount_strategy
 
     @abstractmethod
     def calculate_discount(self, discount: float) -> float:
-        """
-        Abstract method to calculate the discounted price of the item.
-        Subclasses must provide their implementation.
-
-        param discount: Discount percentage to apply (e.g., 10 for 10%).
-        return: Discounted price of the item.
-        """
         pass
 
     def apply_tax(self, tax_percentage: float) -> float:
-        """
-        Calculate the price after applying tax.
-
-        param tax_percentage: Tax percentage to apply (e.g., 15 for 15%).
-        return: Price of the item after tax is added.
-        """
         return self.price * (1 + tax_percentage / 100)
 
     def is_available(self) -> bool:
@@ -142,6 +171,11 @@ class Table(Furniture):
         extra_discount = 10 if self.is_extendable else 0
         total_discount = seasonal_discount + extra_discount
         return self.price * (1 - total_discount / 100)
+
+    def table_info(self):
+        """Return table-specific details."""
+        return f"{self.name}: Shape - {self.shape}, Extendable - {'Yes' if self.is_extendable else 'No'}, Available: " \
+               f"{self.available_quantity}"
 
 
 class Sofa(Furniture):
@@ -271,3 +305,28 @@ class Wardrobe(Furniture):
     def wardrobe_info(self):
         """Return wardrobe-specific details."""
         return f"{self.name}: Doors - {self.num_doors}, Mirror - {self.has_mirror}"
+
+    # Factory Pattern Implementation
+    class FurnitureFactory:
+        """
+        Factory class for creating furniture dynamically.
+        This class should not be instantiated.
+        """
+
+        @staticmethod
+        def create_furniture(furniture_type, **kwargs):
+            kwargs.setdefault("available_quantity", 0)
+            kwargs.setdefault("discount_strategy", NoDiscount())
+
+            if furniture_type == "Chair":
+                return Chair(**kwargs)
+            elif furniture_type == "Table":
+                return Table(**kwargs)
+            elif furniture_type == "Sofa":
+                return Sofa(**kwargs)
+            elif furniture_type == "Bed":
+                return Bed(**kwargs)
+            elif furniture_type == "Wardrobe":
+                return Wardrobe(**kwargs)
+            else:
+                raiseValueError(f"Unknown furniture type: {furniture_type}")

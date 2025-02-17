@@ -1,5 +1,26 @@
 import hashlib
 import os
+import csv
+from abc import ABC, abstractmethod
+from order import Order  # For updating the existent orders of users
+
+
+class UserObserver(ABC):
+    """
+    Abstract base class for observing user changes.
+    """
+    @abstractmethod
+    def update(self, user, change_type):
+        pass
+
+
+class ProfileUpdateNotifier(UserObserver):
+    """
+    Notifies when a user updates their profile.
+    """
+    def update(self, user, change_type):
+        if change_type == "profile_updated":
+            print(f" User {user.name} updated their profile.")
 
 
 class User:
@@ -22,7 +43,18 @@ class User:
         self.password, self.salt = self.hash_password(password)  # Store hashed password and salt
         self.address = address
         self.order_history = []  # List of past orders
-        # we can add a wish list here
+        self.wishlist = []  # We added a wish list here
+        self.observers = []  # We Added observers for User changes
+
+    def add_observer(self, observer: UserObserver):
+        self.observers.append(observer)
+
+    def remove_observer(self, observer: UserObserver):
+        self.observers.remove(observer)
+
+    def notify_observers(self, change_type):
+        for observer in self.observers:
+            observer.update(self, change_type)
 
     @staticmethod
     def hash_password(password: str) -> (str, str):
@@ -59,6 +91,7 @@ class User:
             self.name = name
         if address:
             self.address = address
+        self.notify_observers("profile_updated")  # Notify observers of profile updates
 
     def add_order_to_history(self, order):
         """
@@ -67,6 +100,7 @@ class User:
         param order: Order object to add.
         """
         self.order_history.append(order)
+        self.notify_observers("order_added")
 
     def view_order_history(self):
         """
@@ -74,9 +108,56 @@ class User:
         """
         return [str(order) for order in self.order_history] if self.order_history else ["No past orders."]
 
-        # if not self.order_history:
-        #     print(f"{self.name} has no past orders.")
-        # else:
-        #     print(f"Order History for {self.name}:")
-        #     for order in self.order_history:
-        #         print(f"- {order}")
+    def add_to_wishlist(self, item):
+        """
+        Add an item to the user's wishlist.
+        """
+        self.wishlist.append(item)
+        print(f"{item.name} added to wishlist.")
+
+    def remove_from_wishlist(self, item):
+        """
+        Remove an item from the wishlist.
+        """
+        if item in self.wishlist:
+            self.wishlist.remove(item)
+            print(f" {item.name} removed from wishlist.")
+        else:
+            print(f"{item.name} is not in the wishlist.")
+
+    def view_wishlist(self):
+        """
+        Display the user's wishlist. If it's empty, return a message.
+        """
+        return [item.name for item in self.wishlist] if self.wishlist else ["Wishlist is empty."]
+
+    def save_to_csv(self, filename="users.csv"):
+        """
+        Save user details to a CSV file.
+        """
+        with open(filename, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["name", "email", "password", "salt", "address", "order_history", "wishlist"])
+            writer.writerow([
+                self.name, self.email, self.password, self.salt , self.address,
+                "|".join(self.order_history), "|".join(self.wishlist) if self.wishlist else "Wishlist is empty"
+            ])
+        print("User data saved successfully to CSV.")
+
+    @staticmethod
+    def load_from_csv(filename="users.csv"):
+        """
+        Load user details from a CSV file.
+        """
+        try:
+            with open(filename, mode="r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    user = User(row["name"], row["email"], row["password"], row["address"])
+                    user.order_history = row["order_history"].split("|")
+                    user.wishlist = row["wishlist"].split("|") if row["wishlist"] != "Wishlist is empty" else []
+                    print(" User data loaded successfully from CSV.")
+                    return user
+        except FileNotFoundError:
+            print(" User CSV file not found.")
+            return None

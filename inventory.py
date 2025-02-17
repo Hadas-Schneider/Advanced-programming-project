@@ -1,8 +1,29 @@
-from furniture import Furniture
+from abc import ABC, abstractmethod
+from furniture import Furniture, FurnitureFactory
+
+class InventoryObserver(ABC):
+    """
+    Abstract base class for observers watching inventory changes.
+    """
+
+    @abstractmethod
+    def update(self, item, change_type):
+        pass
+
+class LowStockNotifier(InventoryObserver):
+    """
+    Notifies when an item's stack is low.
+    """
+    def __init__(self, threshold=5):
+        self.threshold = threshold
+
+    def update(self, item, change_type):
+        if change_type in ("added", "updated") and item.available_quantity <= self.threshold:
+            print(f" Warning: Low stock for {item.name}! Only {item.available_quantity} left.")
 
 class Inventory:
     """
-       Manages the collection of furniture items in the store, using a nested dictionary structure.
+       Manages the collection of furniture items in the store, using an observer pattern.
        Items are grouped by their type for efficient search operations.
        Handles operations such as adding, removing, updating, and searching for items.
     """
@@ -10,6 +31,17 @@ class Inventory:
     def __init__(self):
         """Initialize an empty inventory grouped by furniture type."""
         self.items_by_type = {}  # {type: {name: Furniture}}
+        self.observers = []  # List of observers
+
+    def add_observer(self, observer: InventoryObserver):
+        self.observers.append(observer)
+
+    def remove_observer(self, observer: InventoryObserver):
+        self.observers.remove(observer)
+
+    def notify_observers(self, item, change_type):
+        for observer in self.observers:
+            observer.update(item, change_type)
 
     def add_item(self, item: Furniture):
         """
@@ -17,7 +49,6 @@ class Inventory:
         param item: The furniture object to be added.
         """
         furniture_type = item.type  # Get the class name as the type
-
         if furniture_type in self.items_by_type:
             if item.name in self.items_by_type[furniture_type]:
                 self.items_by_type[furniture_type][item.name].available_quantity += item.available_quantity
@@ -25,6 +56,7 @@ class Inventory:
                 self.items_by_type[furniture_type][item.name] = item
         else:
             self.items_by_type[furniture_type] = {item.name: item}
+        self.notify_observers(item, "added")
 
     def remove_item(self, name: str, furniture_type: str):
         """
@@ -34,7 +66,9 @@ class Inventory:
         param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
+            item = self.items_by_type[furniture_type][name]
             del self.items_by_type[furniture_type][name]
+            self.notify_observers(item, "removed")
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
 
@@ -48,6 +82,7 @@ class Inventory:
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
             self.items_by_type[furniture_type][name].available_quantity = quantity
+            self.notify_observers(self.items_by_type[furniture_type][name], "updated")
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
 
@@ -80,7 +115,7 @@ class Inventory:
         """
         all_items = []
         for furniture_type, items in self.items_by_type.items():
-            for name, item in items.items():
+            for item in items.items():
                 all_items.append({
                     'id': item.u_id,
                     'name': item.name,
