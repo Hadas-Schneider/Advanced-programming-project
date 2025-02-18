@@ -29,7 +29,7 @@ class User:
     Handles user details, authentication, and order history.
     """
 
-    def __init__(self, name: str, email: str, password: str, address: str):
+    def __init__(self, name: str, email: str, password: str, address: str, payment_method: str):
         """
         Initialize a User object.
 
@@ -37,11 +37,13 @@ class User:
         param email: Email address of the user (unique identifier).
         param password: Plaintext password for the user.
         param address: Shipping address for the user.
+        param payment_method = Payment method that the user chooses.
         """
         self.name = name
         self.email = email
         self.password, self.salt = self.hash_password(password)  # Store hashed password and salt
         self.address = address
+        self.payment_method = payment_method if payment_method else "Credit Card"  # Added default payment method
         self.order_history = []  # List of past orders
         self.wishlist = []  # We added a wish list here
         self.observers = []  # We Added observers for User changes
@@ -93,6 +95,15 @@ class User:
             self.address = address
         self.notify_observers("profile_updated")  # Notify observers of profile updates
 
+    def update_payment_method(self, payment_method: str):
+        """
+        Update the user's preferred payment method.
+        :param payment_method: a default value
+        :return: selected payment method by the user.
+        """
+        self.payment_method = payment_method
+        print(f"Payment method updated to: {payment_method}")
+
     def add_order_to_history(self, order):
         """
         Add an order to the user's order history.
@@ -137,10 +148,12 @@ class User:
         """
         with open(filename, mode="w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["name", "email", "password", "salt", "address", "order_history", "wishlist"])
+            writer.writerow(["name", "email", "password", "salt", "address", "payment_method", "order_history",
+                            "wishlist"])
             writer.writerow([
-                self.name, self.email, self.password, self.salt , self.address,
-                "|".join(self.order_history), "|".join(self.wishlist) if self.wishlist else "Wishlist is empty"
+                self.name, self.email, self.password, self.salt, self.address, self.payment_method,
+                "|".join(self.order_history) if self.order_history else "No orders",
+                "|".join(self.wishlist) if self.wishlist else "Wishlist is empty"
             ])
         print("User data saved successfully to CSV.")
 
@@ -153,11 +166,13 @@ class User:
             with open(filename, mode="r") as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    user = User(row["name"], row["email"], row["password"], row["address"])
-                    user.order_history = row["order_history"].split("|")
+                    user = User(row["name"], row["email"], row["password"], row["address"],
+                                row.get("payment_method", "Credit Card")
+                                )
+                    user.order_history = row["order_history"].split("|") if row["order_history"] != "No orders" else []
                     user.wishlist = row["wishlist"].split("|") if row["wishlist"] != "Wishlist is empty" else []
                     print(" User data loaded successfully from CSV.")
                     return user
         except FileNotFoundError:
             print(" User CSV file not found.")
-            return None
+        return None
