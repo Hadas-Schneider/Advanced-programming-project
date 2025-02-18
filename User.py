@@ -39,6 +39,8 @@ class User:
         param address: Shipping address for the user.
         param payment_method = Payment method that the user chooses.
         """
+        if not self.validate_password(password):
+            raise ValueError("Password must be at least 8 characters long and contain at least 1 special character")
         self.name = name
         self.email = email
         self.password, self.salt = self.hash_password(password)  # Store hashed password and salt
@@ -57,6 +59,19 @@ class User:
     def notify_observers(self, change_type):
         for observer in self.observers:
             observer.update(self, change_type)
+
+    @staticmethod
+    def validate_password(password: str) -> bool:
+        """
+        Validate that the user's password meets security requirements.
+        :param password: the password the user chose.
+        :return: boolean value if the password meets criteria.
+        """
+        if len(password) < 8:
+            return False
+        if not any(char in "@#$%^&*!" for char in password):
+            return False
+        return True
 
     @staticmethod
     def hash_password(password: str) -> (str, str):
