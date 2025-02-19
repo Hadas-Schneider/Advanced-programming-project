@@ -1,8 +1,9 @@
-from furniture import Furniture, DiscountStrategy, NoDiscount
+from furniture import Furniture, DiscountStrategy, NoDiscount, FurnitureFactory
 from order import Order
 from inventory import Inventory
 from abc import ABC, abstractmethod
 import csv
+import os
 
 
 class CartObserver(ABC):
@@ -138,7 +139,8 @@ class ShoppingCart:
         # Create and complete order
         order = Order(user=self.user, items=self.cart_items, total_price=total_price)
         order.complete_order()
-        self.user.add_order_to_history(order)  # Save order to user history
+        order.save_to_csv()  # Saving the current order to the CSV file
+        self.user.add_order_to_history(order)  # Save order to user's order history
 
         print("Checkout completed successfully!")
         print(order)
@@ -156,34 +158,68 @@ class ShoppingCart:
         print(f"Processing payment of ${amount:.2f} using {self.user.payment_method}...")
         return True  # Simulate a successful payment
 
-    def save_cart_to_csv(self, filename="cart.csv"):
+    def save_cart_to_csv(self, filename="carts.csv"):
         """
-        Save cart items to a csv file.
+        Save the shopping cart of the user to a CSV file.
+        Each user's cart is saved separately using their email as an identifier.
         """
+        rows = []
+
+        if os.path.exists(filename):
+            with open(filename, mode="r", newline="") as file:
+                reader = csv.reader(file)
+                rows = [row for row in reader if row and row[0] != self.user.email]
+
         with open(filename, mode="w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["item_name", "quantity", "price"])
-            for item, quantity in self.cart_items.items():
-                writer.writerow([item.name, quantity, item.price])
-        print("Cart Saved to CSV.")
+            writer.writerow(["user_email", "item_name", "quantity", "price"])
 
-    def load_cart_from_csv(self, filename="cart.csv"):
+            # Save all carts excluding the current one
+            writer.writerows(rows)
+
+            # Save the current cart
+            for item, quantity in self.cart_items.items():
+                writer.writerow([self.user.email, item.name, quantity, item.price])
+        print(f"Cart for {self.user.email} Saved to CSV.")
+
+    def load_cart_from_csv(self, filename="carts.csv"):
         """
-        Load cart items from a csv file
+        Load the last shopping cart for the user from the CSV file.
         """
-        try:
-            with open(filename, mode="r") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    item_name = row(["item_name"])
-                    quantity = int(row["quantity"])
-                    price = float(row["price"])
-                    # Assuming items exist in inventory, we fetch them.
-                    for items in self.inventory.items_by_type.values():
-                        if item_name in items:
-                            item = items[item_name]
-                            self.add_item(item, quantity)
-            print("Cart loaded from CSV.")
-        except FileNotFoundError:
-            print("Cart CSV file not found.")
+        if not os.path.exists(filename):
+            print("No saved carts found.")
+            return
+
+        self.cart_items = {}
+        with open(filename, mode="r", newline="") as file:
+            reader = csv.reader(file)
+            next(reader, None)  # Skip the headlines row
+            for row in reader:
+                if row and row[0] == self.user.email:
+                    item_name, quantity, price = row[1], int(row[2]), float(row[3])
+
+                    # Create a Furniture instance
+                    item = FurnitureFactory.create_furniture(furniture_type=item_name, name=item_name, price=price)
+                    self.cart_items[item] = quantity
+        print(f"Loaded previous cart for {self.user.email}.")
+
+    def clear_cart_from_csv(self, filename="carts.csv"):
+        """
+        Remove the user's cart from the CSV after checkout.
+        """
+        if not os.path.exists(filename):
+            return
+        # Keeping only the other users' carts
+        with open(filename, mode="r", newline="") as file:
+            reader = csv.reader(file)
+            rows = [row for row in reader if row and row[0] != self.user.email]
+
+        # Saving back the remaining carts of other users
+        with open(filename, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["user_email", "item_name", "quantity", "price"])
+            writer.writerows(rows)
+
+        print(f" Cart for {self.user.email} cleared after checkout.")
+
 

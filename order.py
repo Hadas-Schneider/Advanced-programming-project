@@ -51,11 +51,19 @@ class Order:
         """
         Save Order details to a CSV file.
         """
+        file_exists = os.path.exists(filename)
         with open(filename, mode="a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method,
-                             "|".join([f"{item.name} x {quantity}" for item, quantity in self.items.items()]),
-                             f"${self.total_price:.2f}", self.status])
+            if not file_exists:
+                writer.writerow(["order_id", "user_email", "shipping_address", "payment_method",
+                                 "items", "total_price", "status"])
+
+                items_str = "|".join([f"{item.name} x {quantity} (${item.price:.2f})"
+                                      for item, quantity in self.items.items()])
+
+                writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str
+                                 , f"${self.total_price:.2f}", self.status])
+
         print("Order saved successfully to CSV.")
 
     @staticmethod
@@ -67,8 +75,9 @@ class Order:
         try:
             with open(filename, mode="r") as file:
                 reader = csv.reader(file)
+                next(reader, None)
                 for row in reader:
-                    if len(row) < 6:
+                    if len(row) < 7:  # Check if there are enough columns
                         continue
                     order = {
                         "order_id": row[0],
