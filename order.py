@@ -47,7 +47,7 @@ class Order:
         return (f"Order {self.order_id}: {items_str} | Total: ${self.total_price:.2f} | Status: {self.status} | "
                 f"Shipping to: {self.shipping_address} | Payment method: {self.payment_method}")
 
-    def save_to_csv(self, filename="orders.csv"):
+    def save_order_to_csv(self, filename="orders.csv"):
         """
         Save Order details to a CSV file.
         """

@@ -139,7 +139,9 @@ class ShoppingCart:
         # Create and complete order
         order = Order(user=self.user, items=self.cart_items, total_price=total_price)
         order.complete_order()
-        order.save_cart_to_csv()  # Saving the current order to the CSV file
+        order.save_order_to_csv()  # Saving the current order to the CSV file
+
+        self.clear_cart_from_csv()  # Delete the user's current ordered cart from the carts' CSV file
         self.user.add_order_to_history(order)  # Save order to user's order history
 
         print("Checkout completed successfully!")
