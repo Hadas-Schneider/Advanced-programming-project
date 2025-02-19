@@ -329,4 +329,4 @@ class Wardrobe(Furniture):
             elif furniture_type == "Wardrobe":
                 return Wardrobe(**kwargs)
             else:
-                raiseValueError(f"Unknown furniture type: {furniture_type}")
+                raise ValueError(f"Unknown furniture type: {furniture_type}")
