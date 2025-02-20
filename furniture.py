@@ -306,27 +306,29 @@ class Wardrobe(Furniture):
         """Return wardrobe-specific details."""
         return f"{self.name}: Doors - {self.num_doors}, Mirror - {self.has_mirror}"
 
-    # Factory Pattern Implementation
-    class FurnitureFactory:
-        """
-        Factory class for creating furniture dynamically.
-        This class should not be instantiated.
-        """
 
-        @staticmethod
-        def create_furniture(furniture_type, **kwargs):
-            kwargs.setdefault("available_quantity", 0)
-            kwargs.setdefault("discount_strategy", NoDiscount())
+# Factory Pattern Implementation
+class FurnitureFactory:
+    """
+    Factory class for creating furniture dynamically.
+    This class should not be instantiated.
+    """
 
-            if furniture_type == "Chair":
-                return Chair(**kwargs)
-            elif furniture_type == "Table":
-                return Table(**kwargs)
-            elif furniture_type == "Sofa":
-                return Sofa(**kwargs)
-            elif furniture_type == "Bed":
-                return Bed(**kwargs)
-            elif furniture_type == "Wardrobe":
-                return Wardrobe(**kwargs)
-            else:
-                raise ValueError(f"Unknown furniture type: {furniture_type}")
+    @staticmethod
+    def create_furniture(furniture_type, **kwargs):
+        kwargs.setdefault("available_quantity", 0)
+        kwargs.setdefault("discount_strategy", NoDiscount())
+
+        if furniture_type == "Chair":
+            return Chair(**kwargs)
+        elif furniture_type == "Table":
+            return Table(**kwargs)
+        elif furniture_type == "Sofa":
+            return Sofa(**kwargs)
+        elif furniture_type == "Bed":
+            return Bed(**kwargs)
+        elif furniture_type == "Wardrobe":
+            return Wardrobe(**kwargs)
+        else:
+            raise ValueError(f"Unknown furniture type: {furniture_type}")
+

@@ -1,4 +1,4 @@
-from furniture import Furniture, DiscountStrategy, NoDiscount, FurnitureFactory
+from furniture import Furniture, FurnitureFactory
 from order import Order
 from inventory import Inventory
 from abc import ABC, abstractmethod
@@ -59,7 +59,8 @@ class ShoppingCart:
         """
         available_quantity = self.inventory.items_by_type.get(item.type, {}).get(item.name, item).available_quantity
         if available_quantity < quantity:
-            print(f"Not enough stock units for {item.name}. Available only: {available_quantity}, Requested: {quantity}")
+            print(f"Not enough stock units for {item.name}. Available only: {available_quantity}"
+                  f", Requested: {quantity}")
             return
 
         if item in self.cart_items:
@@ -99,10 +100,11 @@ class ShoppingCart:
 
     def calculate_total(self):
         """
-        Calculate the total price of all items in the cart.
+        Calculate the total price of all items in the cart after applying individual discounts.
         return: Total price as a float.
         """
-        return sum(item.apply_discount() * quantity for item, quantity in self.cart_items.items())
+        total = sum(item.apply_discount() * quantity for item, quantity in self.cart_items.items())
+        return total
 
     def checkout(self):
         """
@@ -115,18 +117,19 @@ class ShoppingCart:
 
         # Validate items against inventory
         for item, quantity in self.cart_items.items():
-            available_quantity = inventory.items_by_type.get(type(item).__name__, {}).get(item.name,
-                                                                                      item).available_quantity
+            available_quantity = self.inventory.items_by_type.get(type(item).__name__, {}).get(item.name, item)\
+                .available_quantity
+
             if available_quantity < quantity:
                 print(f"Not enough stock for {item.name}. Available: {available_quantity}, Requested: {quantity}")
                 return None
 
         # Apply discounts and calculate final total
-        total_price = self.apply_discount()
+        total_price = self.calculate_total()
         print(f"Total after discounts: ${total_price:.2f}")
 
         # Mock payment processing
-        payment_successful = self.process_payment(total_price)
+        payment_successful = self.process_payment(self.user, total_price)
         if not payment_successful:
             print("Payment failed. Please try again.")
             return None
@@ -151,13 +154,13 @@ class ShoppingCart:
         return order
 
     @staticmethod
-    def process_payment(amount):
+    def process_payment(user, amount):
         """
         Mock payment processing.
-        :param amount: Amount to process.
-        :return: True if payment is successful, False otherwise.
+        param amount:The user and the Amount to process.
+        return: True if payment is successful, False otherwise.
         """
-        print(f"Processing payment of ${amount:.2f} using {self.user.payment_method}...")
+        print(f"Processing payment of ${amount:.2f} using {user.payment_method}...")
         return True  # Simulate a successful payment
 
     def save_cart_to_csv(self, filename="carts.csv"):
@@ -223,5 +226,3 @@ class ShoppingCart:
             writer.writerows(rows)
 
         print(f" Cart for {self.user.email} cleared after checkout.")
-
-

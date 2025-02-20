@@ -113,8 +113,8 @@ class User:
     def update_payment_method(self, payment_method: str):
         """
         Update the user's preferred payment method.
-        :param payment_method: a default value
-        :return: selected payment method by the user.
+        param payment_method: a default value
+        return: selected payment method by the user.
         """
         self.payment_method = payment_method
         print(f"Payment method updated to: {payment_method}")
@@ -125,8 +125,11 @@ class User:
 
         param order: Order object to add.
         """
-        self.order_history.append(order)
-        self.notify_observers("order_added")
+        if isinstance(order, Order):
+            self.order_history.append(order)
+            self.notify_observers("order_added")
+        else:
+            print("Error: Trying to add a non-Order object to history")
 
     def view_order_history(self):
         """
