@@ -1,0 +1,7 @@
+[run]
+source = ./
+omit =
+    tests/*
+    setup.py
+    venv/*
+    */__init__.py
