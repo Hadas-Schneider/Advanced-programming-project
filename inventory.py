@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from furniture import Furniture, FurnitureFactory
+from furniture import Furniture
+
 
 class InventoryObserver(ABC):
     """
@@ -9,6 +10,7 @@ class InventoryObserver(ABC):
     @abstractmethod
     def update(self, item, change_type):
         pass
+
 
 class LowStockNotifier(InventoryObserver):
     """
@@ -20,6 +22,7 @@ class LowStockNotifier(InventoryObserver):
     def update(self, item, change_type):
         if change_type in ("added", "updated") and item.available_quantity <= self.threshold:
             print(f" Warning: Low stock for {item.name}! Only {item.available_quantity} left.")
+
 
 class Inventory:
     """

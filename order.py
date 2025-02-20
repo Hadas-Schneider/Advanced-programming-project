@@ -1,5 +1,6 @@
 import uuid
 import csv
+import os
 
 
 class Order:
@@ -61,8 +62,8 @@ class Order:
                 items_str = "|".join([f"{item.name} x {quantity} (${item.price:.2f})"
                                       for item, quantity in self.items.items()])
 
-                writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str
-                                 , f"${self.total_price:.2f}", self.status])
+                writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
+                                f"${self.total_price:.2f}", self.status])
 
         print("Order saved successfully to CSV.")
 
@@ -93,4 +94,3 @@ class Order:
         except FileNotFoundError:
             print("Orders CSV file not found.")
         return orders
-
