@@ -331,3 +331,4 @@ class FurnitureFactory:
             return Wardrobe(**kwargs)
         else:
             raise ValueError(f"Unknown furniture type: {furniture_type}")
+
