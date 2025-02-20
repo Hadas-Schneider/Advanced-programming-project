@@ -37,4 +37,4 @@ def test_clearance_discount_calculate_discount(price, expected):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
