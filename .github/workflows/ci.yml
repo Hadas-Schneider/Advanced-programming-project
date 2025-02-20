@@ -5,9 +5,9 @@ name: Python Tests
 
 on:
   push:
-    branches: [ "feature/discount" ]
+    branches: [ "feature/discount", "Classes" ]
   pull_request:
-    branches: [ "feature/discount" ]
+    branches: [ "feature/discount", "Classes" ]
 
 jobs:
   build:
