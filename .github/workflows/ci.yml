@@ -2,9 +2,9 @@ name: Python Tests and Linting
 
 on:
   push:
-    branches: [ "feature/discount", "Classes", "main" ]
+    branches: [ "feature/discount", "Classes" ]
   pull_request:
-    branches: [ "feature/discount", "Classes", "main" ]
+    branches: [ "feature/discount", "Classes" ]
 
 jobs:
   build:
