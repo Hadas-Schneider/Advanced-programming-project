@@ -5,9 +5,9 @@ name: Python package
 
 on:
   push:
-    branches: [ "Classes" ]
+    branches: [ "Classes", "feature/discount" ]
   pull_request:
-    branches: [ "Classes" ]
+    branches: [ "Classes", "feature/discount" ]
 
 jobs:
   build:
