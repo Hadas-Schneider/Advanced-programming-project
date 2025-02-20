@@ -3,7 +3,7 @@ import csv
 from inventory import Inventory
 from User import User
 from shopping_cart import ShoppingCart
-from furniture import Furniture, Chair, Table, Sofa, Bed
+from furniture import FurnitureFactory
 from order import Order
 import pandas as pd
 
@@ -19,80 +19,33 @@ users = {}
 
 
 def load_furniture_data():
+    global inventory
     with open('furniture_database.csv', newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            # Determine the type of furniture and instantiate the corresponding class
-            if row['Type'] == 'Chair':
-                has_armrests = bool(row.get('Has Armrests', False))
-                item = Chair(
-                    row['u_id'],
-                    row['Name'],
-                    row['Description'],
-                    row['Material'],
-                    row['Color'],
-                    int(row['Warranty Period']),
-                    float(row['Price (in US dollars)']),
-                    tuple(map(int, row['Dimensions'].split('x'))),
-                    row['Country of Creation'],
-                    has_armrests  # Example for Chair-specific attribute
+            try:
+                # Determine the type of furniture and instantiate the corresponding class
+                item = FurnitureFactory.create_furniture(
+                    row['Type'],
+                    u_id=row['u_id'],
+                    name=row['Name'],
+                    description=row['Description'],
+                    material=row['Material'],
+                    color=row['Material'],
+                    wp=int(row['Warranty Period']),
+                    price=float(row['Price (in US Dollars']),
+                    dimensions=tuple(map(int, row['Dimensions'].split('x'))),
+                    country=row['Country of Creation'],
+                    available_quantity=int(row.get('Available Quantity', 0))
                 )
-            elif row['Type'] == 'Table':
-                shape = row.get('Shape', 'Unknown')
-                is_extendable = bool(row.get('Is Extendable', False))
-                item = Table(
-                    row['u_id'],
-                    row['Name'],
-                    row['Description'],
-                    row['Material'],
-                    row['Color'],
-                    int(row['Warranty Period']),
-                    float(row['Price (in US dollars)']),
-                    tuple(map(int, row['Dimensions'].split('x'))),
-                    row['Country of Creation'],
-                    shape,
-                    is_extendable
-                )
-            elif row['Type'] == 'Sofa':
-                has_recliner = bool(row.get('Has recliner', False))
-                num_seats = int(row.get('Num Seats', 3))
-                item = Table(
-                    row['u_id'],
-                    row['Name'],
-                    row['Description'],
-                    row['Material'],
-                    row['Color'],
-                    int(row['Warranty Period']),
-                    float(row['Price (in US dollars)']),
-                    tuple(map(int, row['Dimensions'].split('x'))),
-                    row['Country of Creation'],
-                    has_recliner,
-                    num_seats
-                )
-            elif row['Type'] == 'Bed':
-                has_storage = bool(row.get('Has Storage', False))
-                bed_size = row.get('Bed Size', 'Unknown')
-                item = Table(
-                    row['u_id'],
-                    row['Name'],
-                    row['Description'],
-                    row['Material'],
-                    row['Color'],
-                    int(row['Warranty Period']),
-                    float(row['Price (in US dollars)']),
-                    tuple(map(int, row['Dimensions'].split('x'))),
-                    row['Country of Creation'],
-                    has_storage,
-                    bed_size
-                )
+                inventory.add_item(item)
+            except Exception as e:
+                print(f"Error processing row {row}: {e}")
 
 
-            item.available_quantity = int(row.get('Available Quantity', 0))
-            inventory.add_item(item)
-    return inventory
+load_furniture_data()
+# print(inventory.view_inventory())
 
-inventory = load_furniture_data()
-print(inventory.view_inventory())
 
 @app.route('/')
 def home():
