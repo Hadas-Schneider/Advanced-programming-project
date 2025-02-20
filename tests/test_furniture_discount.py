@@ -7,7 +7,14 @@ from furniture import HolidayDiscount
 from furniture import VIPDiscount
 from furniture import ClearanceDiscount
 
-@pytest.mark.parametrize("price", [2,-5,444])
+# class TestFurnitureDiscount(unittest.TestCase):
+#     def test_no_discount_calculate_discount(self):
+#         f = NoDiscount()
+#         for price in [2, -5, 444]:
+#             with self.subTest(price=price):
+#                 self.assertEqual(f.calculate_discount(price), 0)
+
+@pytest.mark.parametrize("price", [2, -5, 444])
 def test_no_discount_calculate_discount(price):
     f = NoDiscount()
     result = f.calculate_discount(price)
