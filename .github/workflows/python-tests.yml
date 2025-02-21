@@ -43,4 +43,4 @@ jobs:
 
     - name: Run specific test
       run: |
-        pytest test_furniture_discount.py -v
+        pytest tests/test_furniture_discount.py -v
