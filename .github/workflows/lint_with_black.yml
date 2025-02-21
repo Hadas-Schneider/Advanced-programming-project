@@ -36,6 +36,6 @@ jobs:
       run: |
         # black --check .
         # Alternatively, to check specific directories:
-        black --check tests/ src/
+        black --check tests
         # To set a specific line length:
         black --check --line-length 88 .
