@@ -28,5 +28,5 @@ def test_clearance_discount_calculate_discount(price, expected):
     f = ClearanceDiscount ()
     assert expected == f.calculate_discount(price)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
