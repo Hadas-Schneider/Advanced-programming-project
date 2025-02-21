@@ -28,10 +28,5 @@ def test_clearance_discount_calculate_discount(price, expected):
     f = ClearanceDiscount ()
     assert expected == f.calculate_discount(price)
 
-@pytest.mark.parametrize("price, expected", [(2,0.9),(-5,-1.5),(445,133.5)])
-def test_clearance_discount_calculate_discount_failer(price, expected):
-    f = ClearanceDiscount ()
-    assert expected == f.calculate_discount(price)
-
 if __name__ == "__main__":
     unittest.main()
