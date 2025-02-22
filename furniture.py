@@ -233,7 +233,6 @@ class Sofa(Furniture):
         self.has_recliner = has_recliner  # Whether the sofa has a reclining feature
         self.type = "Sofa"
 
-
     def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
         Calculate the discounted percent of the Sofa.
@@ -392,3 +391,4 @@ class FurnitureFactory:
             return Wardrobe(**kwargs)
         else:
             raise ValueError(f"Unknown furniture type: {furniture_type}")
+        
