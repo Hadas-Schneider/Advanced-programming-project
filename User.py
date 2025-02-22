@@ -1,6 +1,7 @@
 import hashlib
 import os
 import csv
+import random
 from abc import ABC, abstractmethod
 from order import Order  # For updating the existent orders of users
 
@@ -81,9 +82,11 @@ class User:
         param password: Plaintext password to hash.
         return: A tuple of (hashed_password, salt).
         """
+        special_characters = "!@#$%^&*()-_=+"
         salt = os.urandom(16).hex()  # Generate a random salt
         salted_password = password + salt
-        hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()
+        special_char = random.choice(special_characters)
+        hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest() + special_char
         return hashed_password, salt
 
     def check_password(self, password: str) -> bool:
