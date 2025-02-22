@@ -160,7 +160,7 @@ class User:
         """
         return [item.name for item in self.wishlist] if self.wishlist else ["Wishlist is empty."]
 
-    def save_to_csv(self, filename="users.csv"):
+    def save_to_csv(self, filename="users_database.csv"):
         """
         Save user details to a CSV file.
         """
@@ -176,7 +176,7 @@ class User:
         print("User data saved successfully to CSV.")
 
     @staticmethod
-    def load_from_csv(filename="users.csv"):
+    def load_from_csv(filename="users_database.csv"):
         """
         Load user details from a CSV file.
         """
