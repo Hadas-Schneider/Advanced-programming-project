@@ -6,28 +6,28 @@ class DiscountStrategy(ABC):
     Abstract base class for discount strategies.
     """
     @abstractmethod
-    def calculate_discount(self, price: float) -> float:
+    def get_discount(self) -> float:
         pass
 
 
 class NoDiscount(DiscountStrategy):
-    def calculate_discount(self, price: float) -> float:
+    def get_discount(self) -> float:
         return 0
 
 
 class HolidayDiscount(DiscountStrategy):
-    def calculate_discount(self, price: float) -> float:
-        return price * 0.15
+    def get_discount(self) -> float:
+        return 15
 
 
 class VIPDiscount(DiscountStrategy):
-    def calculate_discount(self, price: float) -> float:
-        return price * 0.20
+    def get_discount(self) -> float:
+        return 20
 
 
 class ClearanceDiscount(DiscountStrategy):
-    def calculate_discount(self, price: float) -> float:
-        return price * 0.30
+    def get_discount(self) -> float:
+        return 30
 
 
 class Furniture(ABC):
@@ -69,16 +69,21 @@ class Furniture(ABC):
         self.type = "Generic"
         self.discount_strategy = discount_strategy
 
-    def apply_discount(self) -> float:
-        discount = self.discount_strategy.calculate_discount(self.price)
-        return self.price - discount
-
     def set_discount_strategy(self, discount_strategy: DiscountStrategy):
         self.discount_strategy = discount_strategy
 
     @abstractmethod
-    def calculate_discount(self, discount: float) -> float:
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         pass
+
+    @abstractmethod
+    def apply_discount(self, discount: float) -> float:
+        pass
+
+
+    @staticmethod
+    def price_with_discount(price: float, discount: float) -> float :
+        return round(price * (1 - discount / 100), 1)
 
     def apply_tax(self, tax_percentage: float) -> float:
         return self.price * (1 + tax_percentage / 100)
@@ -99,7 +104,7 @@ class Chair(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, has_armrests: bool):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, has_armrests: bool):
         """
         Initialize a Chair object.
 
@@ -112,22 +117,33 @@ class Chair(Furniture):
         param price: Price of the chair in USD.
         param dimensions: Tuple representing the dimensions of the chair (length, width, height) in cm.
         param country: Where the furniture from.
+        param available_quantity: int representing the current available quantity of the chair.
         param has_armrests: Boolean indicating if the chair has armrests.
         """
-        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country, available_quantity)
         self.has_armrests = has_armrests
         self.type = "Chair"
 
-    def calculate_discount(self, base_discount: float) -> float:
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
-        Calculate the discounted price of the chair.
+        Calculate the discounted percent of the chair.
 
-        param base_discount: Discount percentage to apply (e.g., 10 for 10%).
-        return: Discounted price of the chair.
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: total discount percent of the chair.
         """
         additional_discount = 5 if self.has_armrests else 0
-        total_discount = base_discount + additional_discount
-        return self.price * (1 - total_discount / 100)
+        total_discount = min(discount_strategy.get_discount() + additional_discount, 50)  # Cap at 50%
+        return total_discount
+
+    def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Apply the discounted percent on the price of the chair.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: Discounted price of the chair.
+        """
+        total_discount = self.calculate_discount(discount_strategy)
+        return Furniture.price_with_discount(self.price, total_discount)
 
     def chair_info(self):
         """Return chair-specific details."""
@@ -140,7 +156,7 @@ class Table(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, shape: str, is_extendable: bool = False):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, shape: str,  is_extendable: bool = False):
         """
         Initialize a Table object.
 
@@ -153,24 +169,37 @@ class Table(Furniture):
         param price: Price of the item in USD.
         param dimensions: Tuple representing the dimensions of the table (length, width, height) in cm.
         param country: Where the table from.
+        param available_quantity: int representing the current available quantity of the table.
         param shape: Shape of the table (e.g., rectangular, circular).
         param is_extendable: Boolean indicating if the table can expand to become larger.
         """
-        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country, available_quantity)
         self.shape = shape  # Shape of the table (e.g., rectangular, circular)
         self.is_extendable = is_extendable  # Indicates if the table can expand
         self.type = "Table"
 
-    def calculate_discount(self, seasonal_discount: float) -> float:
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
-        Calculate the discounted price of the Table.
+        Calculate the discounted percent of the Table.
 
-        param seasonal_discount: Seasonal discount percentage to apply.
-        return: Discounted price of the chair.
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: total discount percent of the table.
         """
-        extra_discount = 10 if self.is_extendable else 0
-        total_discount = seasonal_discount + extra_discount
-        return self.price * (1 - total_discount / 100)
+        additional_discount = 10 if self.is_extendable else 0
+        total_discount = min(discount_strategy.get_discount() + additional_discount, 50)  # Cap at 50%
+        return total_discount
+
+
+    def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Apply the discounted percent on the price of the table.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: Discounted price of the table.
+        """
+        total_discount = self.calculate_discount(discount_strategy)
+        return Furniture.price_with_discount(self.price, total_discount)
+
 
     def table_info(self):
         """Return table-specific details."""
@@ -184,7 +213,7 @@ class Sofa(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, num_seats: int, has_recliner: bool):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, num_seats: int, has_recliner: bool):
         """
         Initialize a Sofa object.
 
@@ -197,24 +226,36 @@ class Sofa(Furniture):
         param price: Price of the sofa in USD.
         param dimensions: Tuple representing the dimensions of the sofa (length, width, height) in cm.
         param country: Where the sofa from.
+        param available_quantity: int representing the current available quantity of the sofa.
         param num_seats: Number of seats the sofa has.
         param has_recliner: Boolean indicating if the sofa has a reclining feature.
         """
-        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country, available_quantity)
         self.num_seats = num_seats  # Number of seats in the sofa
         self.has_recliner = has_recliner  # Whether the sofa has a reclining feature
         self.type = "Sofa"
 
-    def calculate_discount(self, holiday_discount: float) -> float:
-        """
-        Calculate the discounted price for the sofa.
 
-        param holiday_discount: Holiday discount percentage to apply.
-        return: Discounted price of the sofa.
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Calculate the discounted percent of the Sofa.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: total discount percent of the sofa.
         """
         seat_based_discount = self.num_seats * 2  # 2% per seat
-        total_discount = min(holiday_discount + seat_based_discount, 50)  # Cap at 50%
-        return self.price * (1 - total_discount / 100)
+        total_discount = min(discount_strategy.get_discount() + seat_based_discount, 50)  # Cap at 50%
+        return total_discount
+
+    def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Apply the discounted percent on the price of the sofa.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: Discounted price of the sofa.
+        """
+        total_discount = self.calculate_discount(discount_strategy)
+        return Furniture.price_with_discount(self.price, total_discount)
 
     def sofa_info(self):
         """Return sofa-specific details."""
@@ -227,7 +268,7 @@ class Bed(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, bed_size: str, has_storage: bool):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, bed_size: str, has_storage: bool):
         """
         Initialize a Bed object.
 
@@ -240,24 +281,35 @@ class Bed(Furniture):
         param price: Price of the bed in USD.
         param dimensions: Tuple representing the dimensions of the bed (length, width, height) in cm.
         param country: Where the bed from.
+        param available_quantity: int representing the current available quantity of the bed.
         param bed_size: Size of the bed (e.g., single, double, queen, king).
         param has_storage: Boolean indicating if the bed includes storage space.
         """
-        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country, available_quantity)
         self.bed_size = bed_size  # Size of the bed (e.g., single, double, queen, king)
         self.has_storage = has_storage  # Whether the bed includes storage space
         self.type = "Bed"
 
-    def calculate_discount(self, member_discount: float) -> float:
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
-        Calculate the discounted price for the bed.
+        Calculate the discounted percent of the bed.
 
-        param member_discount: Discount percentage for loyalty program members.
-        return: Discounted price of the bed.
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: total discount percent of the bed.
         """
         storage_discount = 15 if self.has_storage else 0
-        total_discount = member_discount + storage_discount
-        return self.price * (1 - total_discount / 100)
+        total_discount = min(discount_strategy.get_discount() + storage_discount, 50)  # Cap at 50%
+        return total_discount
+
+    def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Apply the discounted percent on the price of the table.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: Discounted price of the table.
+        """
+        total_discount = self.calculate_discount(discount_strategy)
+        return Furniture.price_with_discount(self.price, total_discount)
 
     def bed_info(self):
         """Return bed-specific details."""
@@ -270,7 +322,7 @@ class Wardrobe(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, num_doors: int, has_mirror: bool):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, num_doors: int, has_mirror: bool):
         """
         Initialize a Wardrobe object.
 
@@ -283,24 +335,35 @@ class Wardrobe(Furniture):
         param price: Price of the wardrobe in USD.
         param dimensions: Tuple representing the dimensions of the wardrobe (length, width, height) in cm.
         param country: Where the wardrobe from.
+        param available_quantity: int representing the current available quantity of the wardrobe.
         param num_doors: Number of doors the wardrobe has.
         param has_mirror: Boolean indicating if the wardrobe has a mirror.
         """
-        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country)
+        super().__init__(u_id, name, description, material, color, wp, price, dimensions, country, available_quantity)
         self.num_doors = num_doors  # Number of doors in the wardrobe
         self.has_mirror = has_mirror  # Whether the wardrobe has a mirror
         self.type = "Wardrobe"
 
-    def calculate_discount(self, clearance_discount: float) -> float:
+    def calculate_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
-        Calculate the discounted price for the wardrobe.
+        Calculate the discounted percent of the wardrobe.
 
-        param clearance_discount: Clearance discount percentage to apply.
-        return: Discounted price of the wardrobe.
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: total discount percent of the wardrobe.
         """
         door_discount = self.num_doors * 3  # 3% per door
-        total_discount = clearance_discount + door_discount
-        return self.price * (1 - total_discount / 100)
+        total_discount = min(discount_strategy.get_discount() + door_discount, 50)  # Cap at 50%
+        return total_discount
+
+    def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
+        """
+        Apply the discounted percent on the price of the wardrobe.
+
+        param discount_strategy: Discount percentage base on the DiscountStrategy.
+        return: Discounted price of the wardrobe.
+        """
+        total_discount = self.calculate_discount(discount_strategy)
+        return Furniture.price_with_discount(self.price, total_discount)
 
     def wardrobe_info(self):
         """Return wardrobe-specific details."""

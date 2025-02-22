@@ -2,35 +2,32 @@ import unittest
 
 import pytest
 
+from furniture import DiscountStrategy
 from furniture import NoDiscount
 from furniture import HolidayDiscount
 from furniture import VIPDiscount
 from furniture import ClearanceDiscount
 
 
-@pytest.mark.parametrize("price", [2, -5, 444])
-def test_no_discount_calculate_discount(price):
-    f = NoDiscount()
-    result = f.calculate_discount(price)
-    assert result == 0
+def test_discount_strategy_is_abstract():
+    with pytest.raises(TypeError):
+        DiscountStrategy()
 
+def test_no_discount():
+    strategy = NoDiscount()
+    assert strategy.get_discount() == 0, "NoDiscount should always return 0"
 
-@pytest.mark.parametrize("price, expected", [(2, 0.3), (-5, -0.75), (445, 66.75)])
-def test_holiday_discount_calculate_discount(price, expected):
-    f = HolidayDiscount()
-    assert expected == f.calculate_discount(price)
+def test_holiday_discount():
+    strategy = HolidayDiscount()
+    assert strategy.get_discount() == 15, "HolidayDiscount should return 15"
 
+def test_vip_discount():
+    strategy = VIPDiscount()
+    assert strategy.get_discount() == 20, "VIPDiscount should return 20"
 
-@pytest.mark.parametrize("price, expected", [(2, 0.4), (-5, -1), (445, 89)])
-def test_vip_discount_calculate_discount(price, expected):
-    f = VIPDiscount()
-    assert expected == f.calculate_discount(price)
-
-
-@pytest.mark.parametrize("price, expected", [(2, 0.6), (-5, -1.5), (445, 133.5)])
-def test_clearance_discount_calculate_discount(price, expected):
-    f = ClearanceDiscount()
-    assert expected == f.calculate_discount(price)
+def test_clearance_discount():
+    strategy = ClearanceDiscount()
+    assert strategy.get_discount() == 30, "ClearanceDiscount should return 30"
 
 
 if __name__ == '__main__':

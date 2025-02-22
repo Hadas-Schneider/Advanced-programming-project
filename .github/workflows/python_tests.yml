@@ -34,7 +34,7 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        pytest tests/test_furniture_discount.py -v
+        pytest tests -v
 
     
       
