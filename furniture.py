@@ -103,8 +103,7 @@ class Chair(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str,
-                 available_quantity: int, has_armrests: bool):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, has_armrests: bool):
         """
         Initialize a Chair object.
 

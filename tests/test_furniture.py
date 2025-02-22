@@ -101,7 +101,8 @@
 # @pytest.mark.parametrizea
 # def test_chair_with_armrests_apply_discount(chair_with_armrests, discount_strategy):
 #     result = chair_with_armrests.apply_discount(discount_strategy)
-#     assert result == Furniture.price_with_discount(chair_with_armrests.price, chair_with_armrests.calculate_discount(discount_strategy))
+#     assert result == Furniture.price_with_discount(chair_with_armrests.price,
+#     chair_with_armrests.calculate_discount(discount_strategy))
 #
 # def test_chair_without_armrests_apply_discount(chair_without_armrests, no_discount):
 #     result = chair_without_armrests.apply_discount(no_discount)
