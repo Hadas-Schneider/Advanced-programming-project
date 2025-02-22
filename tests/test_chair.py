@@ -87,6 +87,16 @@ class TestChair(unittest.TestCase):
             with self.subTest(chair=chair_type + " (Out of Stock)"):
                 self.assertFalse(chair.is_available())
 
+    def test_chair_info(self):
+        """Test the chair_info method for both chair types"""
+        expected_info = {
+            "With Armrests": "Office Chair: Armrests - True, Material - Leather",
+            "Without Armrests": "Basic Chair: Armrests - False, Material - Plastic"
+        }
+
+        for chair_type, chair in self.chairs.items():
+            with self.subTest(chair=chair_type):
+                self.assertEqual(chair.chair_info(), expected_info[chair_type])
 
 
 if __name__ == '__main__':

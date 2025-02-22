@@ -13,17 +13,21 @@ def test_discount_strategy_is_abstract():
     with pytest.raises(TypeError):
         DiscountStrategy()
 
+
 def test_no_discount():
     strategy = NoDiscount()
     assert strategy.get_discount() == 0, "NoDiscount should always return 0"
+
 
 def test_holiday_discount():
     strategy = HolidayDiscount()
     assert strategy.get_discount() == 15, "HolidayDiscount should return 15"
 
+
 def test_vip_discount():
     strategy = VIPDiscount()
     assert strategy.get_discount() == 20, "VIPDiscount should return 20"
+
 
 def test_clearance_discount():
     strategy = ClearanceDiscount()

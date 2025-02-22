@@ -80,9 +80,8 @@ class Furniture(ABC):
     def apply_discount(self, discount: float) -> float:
         pass
 
-
     @staticmethod
-    def price_with_discount(price: float, discount: float) -> float :
+    def price_with_discount(price: float, discount: float) -> float:
         return round(price * (1 - discount / 100), 1)
 
     def apply_tax(self, tax_percentage: float) -> float:
@@ -156,7 +155,8 @@ class Table(Furniture):
     """
 
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
-                 price: float, dimensions: tuple, country: str, available_quantity: int, shape: str,  is_extendable: bool = False):
+                 price: float, dimensions: tuple, country: str, available_quantity: int, shape: str,
+                 is_extendable: bool = False):
         """
         Initialize a Table object.
 
@@ -189,7 +189,6 @@ class Table(Furniture):
         total_discount = min(discount_strategy.get_discount() + additional_discount, 50)  # Cap at 50%
         return total_discount
 
-
     def apply_discount(self, discount_strategy: DiscountStrategy) -> float:
         """
         Apply the discounted percent on the price of the table.
@@ -199,7 +198,6 @@ class Table(Furniture):
         """
         total_discount = self.calculate_discount(discount_strategy)
         return Furniture.price_with_discount(self.price, total_discount)
-
 
     def table_info(self):
         """Return table-specific details."""
@@ -394,4 +392,3 @@ class FurnitureFactory:
             return Wardrobe(**kwargs)
         else:
             raise ValueError(f"Unknown furniture type: {furniture_type}")
-
