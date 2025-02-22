@@ -1,12 +1,11 @@
-from flask import Flask, request, jsonify
 import csv
-from inventory import Inventory
-from User import User
-from shopping_cart import ShoppingCart
-from furniture import FurnitureFactory
-from order import Order
-import pandas as pd
 
+from flask import Flask, request, jsonify
+
+from User import User
+from furniture import FurnitureFactory
+from inventory import Inventory
+from shopping_cart import ShoppingCart
 
 app = Flask(__name__)
 
@@ -51,6 +50,7 @@ load_furniture_data()
 def home():
     return "Welcome to the Online Furniture Store API!"
 
+
 # User registration
 @app.route('/user/register', methods=['POST'])
 def register_user():
@@ -80,6 +80,7 @@ def login_user():
 #     furniture_items = inventory1.get_all_items()
 #     return jsonify(furniture_items), 200
 
+
 @app.route('/furniture', methods=['GET'])
 def get_furniture():
     inventory = load_furniture_data()
@@ -94,6 +95,7 @@ def get_furniture():
                 "Available Quantity": item.available_quantity
             })
     return jsonify(furniture_list)
+
 
 # Get a single furniture item by ID
 @app.route('/furniture/<u_id>', methods=['GET'])
