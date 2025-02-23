@@ -5,6 +5,7 @@ from furniture import VIPDiscount
 from furniture import ClearanceDiscount
 from furniture import Table
 
+
 class TestTable(unittest.TestCase):
     def setUp(self):
         """Set up test cases"""
@@ -51,8 +52,10 @@ class TestTable(unittest.TestCase):
 
     def test_apply_discount(self):
         expected_prices = {
-            "With Extension": {"No Discount": 223.2, "Holiday Discount": 186, "VIP Discount": 173.6, "Clearance Discount": 148.8},
-            "Without Extension": {"No Discount": 336, "Holiday Discount": 285.6, "VIP Discount": 268.8, "Clearance Discount": 235.2}
+            "With Extension": {"No Discount": 223.2, "Holiday Discount": 186,
+                               "VIP Discount": 173.6, "Clearance Discount": 148.8},
+            "Without Extension": {"No Discount": 336, "Holiday Discount": 285.6,
+                                  "VIP Discount": 268.8, "Clearance Discount": 235.2}
         }
 
         for table_type, table in self.tables.items():

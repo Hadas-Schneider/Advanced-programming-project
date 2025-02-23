@@ -10,12 +10,12 @@ class TestSofa(unittest.TestCase):
     def setUp(self):
         """Set up test cases"""
         self.sofas = {
-        "With Recliner": Sofa(
-                u_id="VWudm2", name="Cozy Sofa", description="A comfortable fabric sofa without recliner.",
-                material="Fabric", color="Charcoal Gray", wp=1, price=215.0,
-                dimensions=(228, 41, 76), country="Usa", available_quantity=38,
-                num_seats=2, has_recliner=True
-        ),
+            "With Recliner": Sofa(
+                    u_id="VWudm2", name="Cozy Sofa", description="A comfortable fabric sofa without recliner.",
+                    material="Fabric", color="Charcoal Gray", wp=1, price=215.0,
+                    dimensions=(228, 41, 76), country="Usa", available_quantity=38,
+                    num_seats=2, has_recliner=True
+            ),
             "Without Recliner": Sofa(
                 u_id="yJPKkl", name="Relax Sofa", description="A comfortable fabric sofa without recliner.",
                 material="Plastic", color="Charcoal Gray", wp=3, price=553.0,
@@ -52,8 +52,10 @@ class TestSofa(unittest.TestCase):
 
     def test_apply_discount(self):
         expected_prices = {
-            "With Recliner": {"No Discount": 206.4, "Holiday Discount": 174.2, "VIP Discount": 163.4, "Clearance Discount": 141.9},
-            "Without Recliner": {"No Discount": 519.8, "Holiday Discount": 436.9, "VIP Discount": 409.2, "Clearance Discount": 353.9}
+            "With Recliner": {"No Discount": 206.4, "Holiday Discount": 174.2,
+                              "VIP Discount": 163.4, "Clearance Discount": 141.9},
+            "Without Recliner": {"No Discount": 519.8, "Holiday Discount": 436.9,
+                                 "VIP Discount": 409.2, "Clearance Discount": 353.9}
         }
 
         for sofa_type, sofa in self.sofas.items():

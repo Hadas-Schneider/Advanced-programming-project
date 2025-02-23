@@ -10,12 +10,12 @@ class TestBed(unittest.TestCase):
     def setUp(self):
         """Set up test cases"""
         self.beds = {
-        "With Storage": Bed(
-            u_id="S6GoqL", name="Cozy Bed", description="A compact plastic bed queen.",
-            material="Plastic", color="Natural Oak", wp=2, price=129.0,
-            dimensions=(189, 61, 171), country="China", available_quantity=94,
-            bed_size="King", has_storage=True
-        ),
+            "With Storage": Bed(
+                u_id="S6GoqL", name="Cozy Bed", description="A compact plastic bed queen.",
+                material="Plastic", color="Natural Oak", wp=2, price=129.0,
+                dimensions=(189, 61, 171), country="China", available_quantity=94,
+                bed_size="King", has_storage=True
+            ),
             "Without Storage": Bed(
                 u_id="cfJBBm", name="Lush Bed", description="An ergonomic metal bed double.",
                 material="Metal", color="Ivory White", wp=10, price=669.0,
@@ -52,8 +52,10 @@ class TestBed(unittest.TestCase):
 
     def test_apply_discount(self):
         expected_prices = {
-            "With Storage": {"No Discount": 109.6, "Holiday Discount": 90.3, "VIP Discount": 83.9, "Clearance Discount": 71.0},
-            "Without Storage": {"No Discount": 669, "Holiday Discount": 568.6, "VIP Discount": 535.2, "Clearance Discount": 468.3}
+            "With Storage": {"No Discount": 109.6, "Holiday Discount": 90.3,
+                             "VIP Discount": 83.9, "Clearance Discount": 71.0},
+            "Without Storage": {"No Discount": 669, "Holiday Discount": 568.6,
+                                "VIP Discount": 535.2, "Clearance Discount": 468.3}
         }
 
         for bed_type, bed in self.beds.items():

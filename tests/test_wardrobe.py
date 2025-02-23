@@ -6,17 +6,17 @@ from furniture import ClearanceDiscount
 from furniture import Wardrobe
 
 
-class TestSofa(unittest.TestCase):
+class TestWardrobe(unittest.TestCase):
     def setUp(self):
         """Set up test cases"""
         self.wardrobes = {
-        "With Mirror": Wardrobe(
-            u_id="KMWpQl", name="Smart Wardrobe", description="A luxurious glass wardrobe.",
-            material="Glass", color="Charcoal Gray", wp=3, price=631.0,
-            dimensions=(110, 136, 56), country="Italy", available_quantity=52,
-            num_doors=2, has_mirror=True
+            "With Mirror": Wardrobe(
+                u_id="KMWpQl", name="Smart Wardrobe", description="A luxurious glass wardrobe.",
+                material="Glass", color="Charcoal Gray", wp=3, price=631.0,
+                dimensions=(110, 136, 56), country="Italy", available_quantity=52,
+                num_doors=2, has_mirror=True
 
-        ),
+            ),
             "Without Mirror": Wardrobe(
                 u_id="QMqFqc", name="Chic Wardrobe", description="An elegant glass wardrobe with mirror.",
                 material="Glass", color="Charcoal Gray", wp=3, price=652.0,
@@ -53,8 +53,10 @@ class TestSofa(unittest.TestCase):
 
     def test_apply_discount(self):
         expected_prices = {
-            "With Mirror": {"No Discount": 593.1, "Holiday Discount": 498.5, "VIP Discount": 466.9, "Clearance Discount": 403.8},
-            "Without Mirror": {"No Discount": 632.4, "Holiday Discount": 534.6, "VIP Discount": 502.0, "Clearance Discount": 436.8}
+            "With Mirror": {"No Discount": 593.1, "Holiday Discount": 498.5,
+                            "VIP Discount": 466.9, "Clearance Discount": 403.8},
+            "Without Mirror": {"No Discount": 632.4, "Holiday Discount": 534.6,
+                               "VIP Discount": 502.0, "Clearance Discount": 436.8}
         }
 
         for wardrobe_type, wardrobe in self.wardrobes.items():
