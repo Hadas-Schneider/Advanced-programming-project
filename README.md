@@ -1,7 +1,7 @@
-# Online Furniture Store 🛋️ - Advanced Programming Project
+# Advanced Programming Project | Online Furniture Store 🛋️
+-This Project was submitted by Rawad Safiya, Hadas Scheider , Tom Pashinsky and Dana Pugach-
 
-
-Welcome to the Online Furniture Store, a Python-based application that simulates a fully functional e-commerce platform. The application includes inventory management, user profiles, a shopping cart, a checkout process, and order management, all implemented using object-oriented programming (OOP) principles.
+Welcome to our Online Furniture Store, a Python-based application that simulates a fully functional e-commerce platform. The application includes inventory management, user profiles, a shopping cart, a checkout process, and order management, all implemented using object-oriented programming (OOP) principles.
 
 <br> <br>
 
@@ -31,7 +31,7 @@ The application is divided into the following components:
 ### 1. Furniture Management
 Base Class: Furniture
 
-Attributes: name, description, price, dimensions, available_quantity.
+Attributes: u_id, name, description, material, color, wp, price, dimensions, country, available_quantity.<br>
 Abstract method: calculate_discount (overridden in derived classes).<br>
 
 - **Derived Classes:** <br>

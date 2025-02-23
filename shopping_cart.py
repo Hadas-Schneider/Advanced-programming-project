@@ -117,14 +117,11 @@ class ShoppingCart:
 
         # Validate items against inventory
         for item, quantity in self.cart_items.items():
-            item_inventory = self.inventory.items_by_type.get(item.type, {}).get(item.name)
-            if not item_inventory:
-                print(f"Error: Item '{item.name}' not found in inventory.")
-                return None
+            available_quantity = self.inventory.items_by_type.get(type(item).__name__, {}).get(item.name, item)\
+                .available_quantity
 
-            if item_inventory.available_quantity < quantity:
-                print(f"Not enough stock for {item.name}. Available: {item_inventory.available_quantity}"
-                      f", Requested: {quantity}")
+            if available_quantity < quantity:
+                print(f"Not enough stock for {item.name}. Available: {available_quantity}, Requested: {quantity}")
                 return None
 
         # Apply discounts and calculate final total
@@ -147,14 +144,13 @@ class ShoppingCart:
         order.complete_order()
         order.save_order_to_csv()  # Saving the current order to the CSV file
 
-        self.user.add_order_to_history(order)  # Save order to user's order history
-
         self.clear_cart_from_csv()  # Delete the user's current ordered cart from the carts' CSV file
-        self.cart_items = {}  # Clear the cart
+        self.user.add_order_to_history(order)  # Save order to user's order history
 
         print("Checkout completed successfully!")
         print(order)
 
+        self.cart_items = {}  # Clear the cart
         return order
 
     @staticmethod
