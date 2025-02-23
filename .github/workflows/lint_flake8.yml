@@ -5,9 +5,9 @@ name: Python Lint Flake8
 
 on:
   push:
-    branches: [ "feature/discount" ]
+    branches: [ "feature/furniture" ]
   pull_request:
-    branches: [ "feature/discount" ]
+    branches: [ "feature/furniture" ]
 
 jobs:
   build:

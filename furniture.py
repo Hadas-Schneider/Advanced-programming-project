@@ -376,18 +376,31 @@ class FurnitureFactory:
 
     @staticmethod
     def create_furniture(furniture_type, **kwargs):
-        kwargs.setdefault("available_quantity", 0)
-        kwargs.setdefault("discount_strategy", NoDiscount())
+        defaults = {
+            "available_quantity": 0,
+            #"discount_strategy": NoDiscount(),
+            "color": "Black",  # Example of adding multiple default values
+            "material": "Wood",
+            "u_id": "00",
+            "description": "None",
+            "wp": 5,
+            "price": 100.0,
+            "dimensions": (50, 50, 50),
+            "country": "USA"
+        }
+        defaults.update(kwargs)
+        #kwargs.setdefault("available_quantity", 0)
+        #kwargs.setdefault("discount_strategy", NoDiscount())
 
         if furniture_type == "Chair":
-            return Chair(**kwargs)
+            return Chair(**defaults)
         elif furniture_type == "Table":
-            return Table(**kwargs)
+            return Table(**defaults)
         elif furniture_type == "Sofa":
-            return Sofa(**kwargs)
+            return Sofa(**defaults)
         elif furniture_type == "Bed":
-            return Bed(**kwargs)
+            return Bed(**defaults)
         elif furniture_type == "Wardrobe":
-            return Wardrobe(**kwargs)
+            return Wardrobe(**defaults)
         else:
             raise ValueError(f"Unknown furniture type: {furniture_type}")
