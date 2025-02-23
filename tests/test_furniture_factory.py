@@ -22,12 +22,13 @@ class TestFurnitureFactory(unittest.TestCase):
         table = FurnitureFactory.create_furniture("Table", name="Cosy Table", shape="Rectangular", is_extendable=True)
         self.assertIsInstance(table, Table)
         self.assertEqual(table.name, "Cosy Table")
-        #self.assertEqual()
+        self.assertEqual(table.shape, "Rectangular")
 
     def test_create_sofa(self):
         sofa = FurnitureFactory.create_furniture("Sofa", name="Luxury Sofa", num_seats=4, has_recliner=True)
         self.assertIsInstance(sofa, Sofa)
         self.assertEqual(sofa.name, "Luxury Sofa")
+        self.assertEqual(sofa.num_seats, 4)
 
     def test_create_bed(self):
         bed = FurnitureFactory.create_furniture("Bed", name="King Bed", bed_size="King", has_storage=False)
@@ -39,6 +40,7 @@ class TestFurnitureFactory(unittest.TestCase):
         wardrobe = FurnitureFactory.create_furniture("Wardrobe", name="Wooden Wardrobe", num_doors=3, has_mirror=True)
         self.assertIsInstance(wardrobe, Wardrobe)
         self.assertEqual(wardrobe.name, "Wooden Wardrobe")
+        self.assertEqual(wardrobe.has_mirror, True)
 
     def test_invalid_furniture_type(self):
         with self.assertRaises(ValueError) as context:
