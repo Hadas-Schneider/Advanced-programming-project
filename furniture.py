@@ -53,7 +53,7 @@ class Furniture(ABC):
         param available_quantity : int representing the current available quantity of the item.
         param country: Where the furniture from.
         param type: str representing the item's type.
-        param discount_strategy : representing the discount the item should have.
+        param discount_strategy : representing the discount the item should have( the default is No Discount).
 
         """
         self.u_id = u_id

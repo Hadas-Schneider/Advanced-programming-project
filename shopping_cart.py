@@ -1,4 +1,5 @@
-from furniture import Furniture, FurnitureFactory
+from furniture import Furniture, FurnitureFactor
+from furniture import DiscountStrategy, NoDiscount, HolidayDiscount, VIPDiscount, ClearanceDiscount
 from order import Order
 from inventory import Inventory
 from abc import ABC, abstractmethod
@@ -32,15 +33,18 @@ class ShoppingCart:
     Handles adding/removing items, calculating totals, and applying discounts.
     """
 
-    def __init__(self, user, inventory: Inventory):
+    def __init__(self, user, inventory: Inventory, discount_strategy: DiscountStrategy = NoDiscount()):
         """
         Initialize a ShoppingCart object.
 
         param user: User object associated with the cart.
+        param inventory : Inventory object to check the items' stock levels
+        param discount_strategy : Discount strategy to apply to the entire cart (The default is No Discount).
         """
         self.user = user
         self.inventory = inventory
         self.cart_items = {}  # {Furniture: quantity}
+        self.discount_strategy = discount_strategy  # We assume no discount to start with
         self.observers = []
 
     def add_observer(self, observer: CartObserver):
@@ -49,6 +53,12 @@ class ShoppingCart:
     def notify_observers(self, change_type, item=None):
         for observer in self.observers:
             observer.update(self, change_type, item)
+
+    def set_cart_discount_strategy(self, discount_strategy: DiscountStrategy):
+        """
+        Set a discount strategy for the entire cart.This will be used as the last step in the checkout.
+        """
+        self.discount_strategy = discount_strategy
 
     def add_item(self, item: Furniture, quantity=1):
         """
@@ -100,11 +110,15 @@ class ShoppingCart:
 
     def calculate_total(self):
         """
-        Calculate the total price of all items in the cart after applying individual discounts.
+        Calculate the total price of all items in the cart after applying individual and cart-wide discounts.
         return: Total price as a float.
         """
         total = sum(item.apply_discount() * quantity for item, quantity in self.cart_items.items())
-        return total
+        # Get the type of discount to apply to the cart
+        cart_discount = self.discount_strategy.get_discount()
+        final_price = Furniture.price_with_discount(total, cart_discount)
+
+        return final_price
 
     def checkout(self):
         """
