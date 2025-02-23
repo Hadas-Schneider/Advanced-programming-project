@@ -201,8 +201,8 @@ class Table(Furniture):
 
     def table_info(self):
         """Return table-specific details."""
-        return f"{self.name}: Shape - {self.shape}, Extendable - {'Yes' if self.is_extendable else 'No'}, Available: " \
-               f"{self.available_quantity}"
+        return f"{self.name}: Shape - {self.shape}, Extendable - {'Yes' if self.is_extendable else 'No'}, Material: " \
+               f"{self.material}"
 
 
 class Sofa(Furniture):

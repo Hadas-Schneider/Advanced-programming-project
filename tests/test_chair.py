@@ -31,7 +31,6 @@ class TestChair(unittest.TestCase):
         }
 
     def test_initialization(self):
-        """Test Chair object initialization for both chairs"""
         for chair_type, chair in self.chairs.items():
             with self.subTest(chair=chair_type):
                 self.assertIsInstance(chair, Chair)
@@ -39,7 +38,6 @@ class TestChair(unittest.TestCase):
                 self.assertIsInstance(chair.has_armrests, bool)
 
     def test_calculate_discount(self):
-        """Test discount calculation for both chairs with different discount types"""
         expected_discounts = {
             "With Armrests": {"No Discount": 5, "Holiday Discount": 20, "VIP Discount": 25, "Clearance Discount": 35},
             "Without Armrests": {"No Discount": 0, "Holiday Discount": 15, "VIP Discount": 20, "Clearance Discount": 30}
@@ -52,7 +50,6 @@ class TestChair(unittest.TestCase):
                     self.assertEqual(calculated_discount, expected_discounts[chair_type][discount_type])
 
     def test_apply_discount(self):
-        """Test applying discount for both chairs"""
         expected_prices = {
             "With Armrests": {"No Discount": 190, "Holiday Discount": 160, "VIP Discount": 150, "Clearance Discount": 130},
             "Without Armrests": {"No Discount": 100, "Holiday Discount": 85, "VIP Discount": 80, "Clearance Discount": 70}
@@ -65,7 +62,6 @@ class TestChair(unittest.TestCase):
                     self.assertAlmostEqual(discounted_price, expected_prices[chair_type][discount_type])
 
     def test_apply_tax(self):
-        """Test apply_tax function with different tax percentages"""
         tax_percentages = [5, 10, 15]  # List of different tax percentages
 
         for chair_type, chair in self.chairs.items():
@@ -76,7 +72,6 @@ class TestChair(unittest.TestCase):
                     self.assertAlmostEqual(result, expected_price, places=2)
 
     def test_is_available(self):
-        """Test is_available method for both chairs"""
         for chair_type, chair in self.chairs.items():
             with self.subTest(chair=chair_type):
                 self.assertTrue(chair.is_available())
@@ -88,7 +83,6 @@ class TestChair(unittest.TestCase):
                 self.assertFalse(chair.is_available())
 
     def test_chair_info(self):
-        """Test the chair_info method for both chair types"""
         expected_info = {
             "With Armrests": "Office Chair: Armrests - True, Material - Leather",
             "Without Armrests": "Basic Chair: Armrests - False, Material - Plastic"
