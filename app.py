@@ -1,72 +1,101 @@
-from flask import Flask, request, jsonify
-from flask_httpauth import HTTPBasicAuth
-from furniture import FurnitureFactory
-from User import User
-from shopping_cart import ShoppingCart
-from inventory import Inventory
 import csv
 
+from flask import Flask, request, jsonify
+
+from User import User
+from furniture import FurnitureFactory
+from inventory import Inventory
+from shopping_cart import ShoppingCart
+
 app = Flask(__name__)
-auth = HTTPBasicAuth()
+
 # Initialize inventory and users
 inventory = Inventory()
 users = {}
-orders = {}
+
+# df = pd.read_csv("furniture_database.csv")
+# print(df[['u_id','Type']])
 
 
-@auth.verify_password
-def verify_password(email, password):
-    user = users.get(email)
-    if user and user.check_password(password):
-        return user
-    return None
+def load_furniture_data():
+    global inventory
+    with open('furniture_database.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            try:
+                # Determine the type of furniture and instantiate the corresponding class
+                item = FurnitureFactory.create_furniture(
+                    row['Type'],
+                    u_id=row['u_id'],
+                    name=row['Name'],
+                    description=row['Description'],
+                    material=row['Material'],
+                    color=row['Material'],
+                    wp=int(row['Warranty Period']),
+                    price=float(row['Price (in US Dollars']),
+                    dimensions=tuple(map(int, row['Dimensions'].split('x'))),
+                    country=row['Country of Creation'],
+                    available_quantity=int(row.get('Available Quantity', 0))
+                )
+                inventory.add_item(item)
+            except Exception as e:
+                print(f"Error processing row {row}: {e}")
 
 
-@app.route("/")
+load_furniture_data()
+# print(inventory.view_inventory())
+
+
+@app.route('/')
 def home():
     return "Welcome to the Online Furniture Store API!"
 
+
 # User registration
 @app.route('/user/register', methods=['POST'])
-
 def register_user():
     data = request.json
-    email = data["email"]
-    if email in users:
+    if data['email'] in users:
         return jsonify({'error': 'User already exists'}), 400
 
-    new_user = User(
-        name=data["name"],
-        email=data["email"],
-        password=data["password"],
-        address=data["address"],
-        payment_method=data.get("payment_method", "Credit Card")
-    )
-    users[email] = new_user
-    return jsonify({'message': 'User registered successfully'}), 201
+    users[data['email']] = User(data['name'], data['email'], data['password'], data['address'])
+    return jsonify({'message': 'User registered successfully'})
 
 
-@app.route("/user/login", methods=["POST"])  # User login
+# User login (simple check)
+@app.route('/user/login', methods=['POST'])
 def login_user():
     data = request.json
-    email = data.get("email")
-    password = data.get("password")
+    user = users.get(data['email'])
+    if not user or not user.check_password(data['password']):
+        return jsonify({'error': 'Invalid email or password'}), 401
 
-    user = users.get(email)
-    if not user:
-        return jsonify({"error": "User email not found."}), 404
+    return jsonify({'message': 'Login successful'})
 
-    if not user.check_password(password):
-        return jsonify({"message": "Invalid password"}), 401
 
-    return jsonify({
-        "message": "Login Successful!", "user": {
-            "name": user.name,
-            "email": user.email,
-            "address": user.address,
-            "payment_method": user.payment_method,
-            "order_history": user.view_order_history(),
-        }})
+# Get all furniture items
+# @app.route('/furniture', methods=['GET'])
+# def get_furniture():
+#     inventory1 = load_furniture_data()
+#     furniture_items = inventory1.get_all_items()
+#     return jsonify(furniture_items), 200
+
+
+@app.route('/furniture', methods=['GET'])
+def get_furniture():
+    inventory = load_furniture_data()
+    furniture_list = []
+    for furniture_type, items in inventory.items_by_type.items():
+        for item in items.values():
+            furniture_list.append({
+                "u_id": item.u_id,
+                "Type": furniture_type,
+                "Name": item.name,
+                "Price": item.price,
+                "Available Quantity": item.available_quantity
+            })
+    return jsonify(furniture_list)
+
 
 # Get a single furniture item by ID
 @app.route('/furniture/<u_id>', methods=['GET'])
@@ -82,85 +111,37 @@ def get_furniture_item(u_id):
                 })
     return jsonify({'error': 'Item not found'}), 404
 
+
 # Add item to shopping cart
-@app.route("/cart/add", methods=["PUT"])
-@auth.login_required
+@app.route('/cart', methods=['POST'])
 def add_to_cart():
-    user = auth.current_user()
     data = request.json
+    user = users.get(data['email'])
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    item_name = data.get("name")
-    furniture_type = data.get("type")
-    quantity = int(data.get("quantity", 1))
+    cart = ShoppingCart(user)
+    for item_data in data['items']:
+        item = inventory.search(name=item_data['name'])
+        if item:
+            cart.add_item(item[0], item_data['quantity'])
 
-    item = inventory.items_by_type.get(furniture_type, {}).get(item_name)
-    if not item:
-        return jsonify({"error": f"Item '{item_name}' of type '{furniture_type}' not found in inventory."}), 404
-
-    if item.available_quantity < quantity:
-        return jsonify({"error": f"Not enough stock for {item_name}. Only {item.available_quantity} left."}), 400
-
-    if user.email not in orders:
-        orders[user.email] = ShoppingCart(user, inventory)
-
-    cart = orders[user.email]
-    cart.add_item(item, quantity)
-
-    return jsonify({'message': f"{quantity} x {item_name} added to cart."}), 200
+    return jsonify({'message': 'Items added to cart'})
 
 
-@app.route("/cart/view", methods=["GET"])  # View the user's shopping cart
-@auth.login_required
-def view_cart():
-    user = auth.current_user()
-    cart = orders.get(user.email)
-    if not cart:
-        return jsonify({"cart": "Your shopping cart is empty."})
-
-    return jsonify(cart.view_cart())
-
-
-@app.route("/cart/remove", methods=["DELETE"])  # Remove item from cart
-@auth.login_required
-def remove_item_from_cart():
-    user = auth.current_user()
-    data = request.json
-    item_name = data.get("name")
-
-    cart = orders.get(user.email)
-    if not cart:
-        return jsonify({"error": "No cart found for user."}), 404
-
-    cart.remove_item(item_name)
-    return jsonify({"message": f"{item_name} removed from cart."}), 200
-
-
-@app.route('/cart/checkout', methods=['POST'])  # Checkout an order
-@auth.login_required
+# Checkout
+@app.route('/checkout', methods=['POST'])
 def checkout():
-    user = auth.current_user()
-    cart = orders.get(user.email)
-    if not cart or not cart.cart_items:
-        return jsonify({"error": "Cart is empty"}), 400
+    data = request.json
+    user = users.get(data['email'])
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    print("\n🔹 Starting checkout process...")
-    print(f"🔹 Shipping to: {user.address}")
-    print(f"🔹 Payment method: {user.payment_method}")
-
-    order = cart.checkout()  # Using The Checkout method from Shopping_cart.py
-
-    if not order:
-        return jsonify({"error": "Checkout failed. Please check stock availability or payment method."}), 400
-
-    return jsonify({
-        "message": "Order placed successfully!",
-        "order_id": order.order_id,
-        "total_price": order.total_price,
-        "status": order.status,
-        "payment_method": user.payment_method,
-        "items": [{"name": item.name, "quantity": quantity} for item, quantity in order.items.items()]
-
-    })
+    cart = ShoppingCart(user)
+    order = cart.checkout(inventory)
+    if order:
+        return jsonify({'message': 'Order placed successfully', 'order_id': order.order_id})
+    return jsonify({'error': 'Checkout failed'}), 400
 
 
 if __name__ == '__main__':
