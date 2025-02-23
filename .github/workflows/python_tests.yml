@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "feature/discount" ]
   pull_request:
-    branches: [ "feature/discount" ]
+    branches: [ "Classes" ]
 
 jobs:
   build:
@@ -36,11 +36,6 @@ jobs:
       run: |
         pytest tests -v
 
-    - name: test for dana
-      env:
-        PYTHONPATH: ${{ github.workspace }}
-      run: |
-        pytest tests/test_bed.py -v
 
     
       

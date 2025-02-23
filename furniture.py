@@ -378,8 +378,7 @@ class FurnitureFactory:
     def create_furniture(furniture_type, **kwargs):
         defaults = {
             "available_quantity": 0,
-            #"discount_strategy": NoDiscount(),
-            "color": "Black",  # Example of adding multiple default values
+            "color": "Black",
             "material": "Wood",
             "u_id": "00",
             "description": "None",
@@ -389,8 +388,6 @@ class FurnitureFactory:
             "country": "USA"
         }
         defaults.update(kwargs)
-        #kwargs.setdefault("available_quantity", 0)
-        #kwargs.setdefault("discount_strategy", NoDiscount())
 
         if furniture_type == "Chair":
             return Chair(**defaults)

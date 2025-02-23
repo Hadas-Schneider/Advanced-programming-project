@@ -11,8 +11,7 @@ from furniture import NoDiscount
 
 class TestFurnitureFactory(unittest.TestCase):
     def test_create_chair(self):
-        chair = FurnitureFactory.create_furniture("Chair",name="Office Chair",has_armrests=True,
-        )
+        chair = FurnitureFactory.create_furniture("Chair", name="Office Chair", has_armrests=True)
         self.assertIsInstance(chair, Chair)
         self.assertEqual(chair.name, "Office Chair")
         self.assertEqual(chair.price, 100.0)
@@ -20,8 +19,7 @@ class TestFurnitureFactory(unittest.TestCase):
         self.assertIsInstance(chair.discount_strategy, NoDiscount)
 
     def test_create_table(self):
-        table = FurnitureFactory.create_furniture("Table",
-                 name="Cosy Table", shape="Rectangular", is_extendable=True)
+        table = FurnitureFactory.create_furniture("Table", name="Cosy Table", shape="Rectangular", is_extendable=True)
         self.assertIsInstance(table, Table)
         self.assertEqual(table.name, "Cosy Table")
         #self.assertEqual()
@@ -46,6 +44,7 @@ class TestFurnitureFactory(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             FurnitureFactory.create_furniture("Lamp", name="Table Lamp")
         self.assertEqual(str(context.exception), "Unknown furniture type: Lamp")
+
 
 if __name__ == "__main__":
     unittest.main()

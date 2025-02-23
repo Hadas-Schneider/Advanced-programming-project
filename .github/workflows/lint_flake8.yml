@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "feature/discount" ]
   pull_request:
-    branches: [ "feature/discount" ]
+    branches: [ "Classes" ]
 
 jobs:
   build:
