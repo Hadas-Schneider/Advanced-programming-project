@@ -103,8 +103,9 @@ class TestShoppingCart(unittest.TestCase):
         chair_price_after_discount = self.chair.apply_discount(self.chair.discount_strategy)
         table_price_after_discount = self.table.apply_discount(self.table.discount_strategy)
 
-        expected_total = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
-        self.assertEqual(self.cart.calculate_total(), expected_total)
+        subtotal = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
+        expected_total = subtotal * 1.18
+        self.assertEqual(self.cart.calculate_total(tax_percentage=18), expected_total)
 
     def test_calculate_total_with_discount(self):
         """
@@ -118,10 +119,10 @@ class TestShoppingCart(unittest.TestCase):
         chair_price_after_discount = self.chair.apply_discount(self.chair.discount_strategy)
         table_price_after_discount = self.table.apply_discount(self.table.discount_strategy)
 
-        total_before_cart_discount = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
-
-        expected_total = total_before_cart_discount * (1-(VIPDiscount().get_discount() / 100))
-        self.assertEqual(self.cart.calculate_total(), expected_total)
+        subtotal = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
+        total_after_cart_discount = subtotal * (1 - VIPDiscount().get_discount() / 100)
+        expected_total = total_after_cart_discount * 1.18
+        self.assertEqual(self.cart.calculate_total(tax_percentage=18), expected_total)
 
     def test_checkout_success(self):
         """

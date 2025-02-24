@@ -114,7 +114,7 @@ class ShoppingCart:
             print(f"- {item.name}: {quantity} x ${item.price:.2f} = ${item.price * quantity:.2f}")
         print(f"Total: ${self.calculate_total():.2f}")
 
-    def calculate_total(self):
+    def calculate_total(self, tax_percentage=18):
         """
         Calculate the total price of all items in the cart after applying individual and cart-wide discounts.
         return: Total price as a float.
@@ -122,9 +122,10 @@ class ShoppingCart:
         total = sum(item.apply_discount(item.discount_strategy) * quantity
                     for item, quantity in self.cart_items.items())
         cart_discount = self.discount_strategy.get_discount()
-        final_price = Furniture.price_with_discount(total, cart_discount)
+        total_after_discount = Furniture.price_with_discount(total, cart_discount)
+        total_with_tax = total_after_discount * (1 + tax_percentage / 100)
 
-        return final_price
+        return round(total_with_tax, 2)
 
     def checkout(self):
         """

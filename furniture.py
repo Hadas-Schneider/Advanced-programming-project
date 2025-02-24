@@ -93,7 +93,10 @@ class Furniture(ABC):
 
         return: True if available_quantity > 0, otherwise False.
         """
-        return self.available_quantity > 0
+        if self.available_quantity < 1:
+            print(f"Sorry, item '{self.name}' not in stock.")
+            return False
+        return True
 
 
 # Derived Furniture Classes
@@ -101,7 +104,6 @@ class Chair(Furniture):
     """
     Represents a Chair.
     """
-
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
                  price: float, dimensions: tuple, country: str, available_quantity: int, has_armrests: bool):
         """
