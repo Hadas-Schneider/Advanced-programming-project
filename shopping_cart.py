@@ -1,5 +1,5 @@
-from furniture import Furniture, FurnitureFactor
-from furniture import DiscountStrategy, NoDiscount, HolidayDiscount, VIPDiscount, ClearanceDiscount
+from furniture import Furniture, FurnitureFactory
+from furniture import DiscountStrategy, NoDiscount
 from order import Order
 from inventory import Inventory
 from abc import ABC, abstractmethod
@@ -67,16 +67,21 @@ class ShoppingCart:
         param item: Furniture object to add.
         param quantity: Quantity of the item to add (default: 1).
         """
+        if not isinstance(quantity, int) or quantity <= 0:
+            raise ValueError("Quantity must be a positive integer")
+        if item.name not in self.inventory.items_by_type.get(item.type, {}):
+            raise KeyError(f"Item {item.name} does not exist in inventory.")
+
         available_quantity = self.inventory.items_by_type.get(item.type, {}).get(item.name, item).available_quantity
         if available_quantity < quantity:
-            print(f"Not enough stock units for {item.name}. Available only: {available_quantity}"
+            raise ValueError(f"Not enough stock units for {item.name}. Available only: {available_quantity}"
                   f", Requested: {quantity}")
-            return
 
         if item in self.cart_items:
             self.cart_items[item] += quantity
         else:
             self.cart_items[item] = quantity
+
         self.notify_observers("added", item)
 
     def remove_item(self, item: Furniture, quantity=1):
@@ -86,14 +91,15 @@ class ShoppingCart:
         param item: Furniture object to remove.
         param quantity: Quantity to remove (default: 1).
         """
-        if item in self.cart_items:
-            if self.cart_items[item] <= quantity:
-                del self.cart_items[item]
-            else:
-                self.cart_items[item] -= quantity
-            self.notify_observers("removed", item)
+        if item not in self.cart_items:
+            raise KeyError(f"Item '{item.name}' is not in the cart.")
+
+        if self.cart_items[item] <= quantity:
+            del self.cart_items[item]
         else:
-            print(f"Item '{item.name}' is not in the cart.")
+            self.cart_items[item] -= quantity
+
+        self.notify_observers("removed", item)
 
     def view_cart(self):
         """
@@ -113,8 +119,8 @@ class ShoppingCart:
         Calculate the total price of all items in the cart after applying individual and cart-wide discounts.
         return: Total price as a float.
         """
-        total = sum(item.apply_discount() * quantity for item, quantity in self.cart_items.items())
-        # Get the type of discount to apply to the cart
+        total = sum(item.apply_discount(item.discount_strategy) * quantity
+                    for item, quantity in self.cart_items.items())
         cart_discount = self.discount_strategy.get_discount()
         final_price = Furniture.price_with_discount(total, cart_discount)
 
@@ -140,6 +146,9 @@ class ShoppingCart:
 
         # Apply discounts and calculate final total
         total_price = self.calculate_total()
+        if total_price == 0:
+            print("Checkout failed: Total price is 0.")
+            return None
         print(f"Total after discounts: ${total_price:.2f}")
 
         # Mock payment processing
@@ -154,7 +163,7 @@ class ShoppingCart:
                                            .available_quantity - quantity)
 
         # Create and complete order
-        order = Order(user=self.user, items=self.cart_items, total_price=total_price)
+        order = Order(user=self.user, items=self.cart_items.copy(), total_price=total_price)
         order.complete_order()
         order.save_order_to_csv()  # Saving the current order to the CSV file
 
