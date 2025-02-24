@@ -89,7 +89,7 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(rows[0], ["order_id", "user_email", "shipping_address", "payment_method",
                                    "items", "total_price", "status"])
 
-        items_str = "|".join(["Chair x 2 ($20.00)", f"Table x 1 ($80.00)", f"Bed x 1 ($100.00)"])
+        items_str = "|".join(["Chair x 2 ($20.00)", "Table x 1 ($80.00)", "Bed x 1 ($100.00)"])
         expected_row = ["f47ac10b-58cc-4372-a567-0e02b2c3d479", "test@example.com", "123 Tel Aviv", "Credit card",
                         items_str, "$200.00", "Pending"]
 
