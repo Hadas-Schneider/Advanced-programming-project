@@ -160,8 +160,12 @@ class ShoppingCart:
 
         # Deduct inventory and create order
         for item, quantity in self.cart_items.items():
-            self.inventory.update_quantity(item.name, item.type, self.inventory.items_by_type[item.type][item.name]
-                                           .available_quantity - quantity)
+            new_quantity = self.inventory.items_by_type[item.type][item.name].available_quantity - quantity
+            success = self.inventory.update_quantity(item.name, item.type, new_quantity)
+            if success:
+                print(f" {quantity} units of '{item.name}' have been deducted from inventory.")
+            else:
+                print(f" Warning: Could not update stock for '{item.name}'.")
 
         # Create and complete order
         order = Order(user=self.user, items=self.cart_items.copy(), total_price=total_price)
