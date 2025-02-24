@@ -59,10 +59,10 @@ class Order:
                 writer.writerow(["order_id", "user_email", "shipping_address", "payment_method",
                                  "items", "total_price", "status"])
 
-                items_str = "|".join([f"{item.name} x {quantity} (${item.price:.2f})"
+            items_str = "|".join([f"{item.name} x {quantity} (${item.price:.2f})"
                                       for item, quantity in self.items.items()])
 
-                writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
+            writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
                                 f"${self.total_price:.2f}", self.status])
 
         print("Order saved successfully to CSV.")
