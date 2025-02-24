@@ -112,7 +112,8 @@ class TestOrder(unittest.TestCase):
     def test_load_orders_from_csv(self, mock_file):
         # Create CSV data with proper formatting (no leading spaces)
         csv_data = """order_id,user_email,shipping_address,payment_method,items,total_price,status
-    f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00,Pending"""
+    f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,
+    Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00,Pending"""
 
         mock_file.return_value.__iter__.return_value = csv_data.splitlines()
 
@@ -165,7 +166,8 @@ class TestOrder(unittest.TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_load_orders_from_csv_malformed_data(self, mock_file):
         csv_data = """order_id,user_email,shipping_address,payment_method,items,total_price
-                     f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00"""
+                     f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,
+                     Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00"""
 
         mock_file.return_value.__iter__.return_value = csv_data.splitlines()
 
