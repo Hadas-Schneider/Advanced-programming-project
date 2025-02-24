@@ -4,6 +4,7 @@ from furniture import Chair, Table, VIPDiscount, NoDiscount
 from User import User
 from inventory import Inventory
 
+
 class TestShoppingCart(unittest.TestCase):
 
     def setUp(self):
