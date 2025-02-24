@@ -52,14 +52,10 @@ class TestOrder(unittest.TestCase):
 
     def test_mark_as_not_delivered(self):
         self.order.status = "Pending"
-
         captured_output = io.StringIO()
         sys.stdout = captured_output
-
         self.order.mark_as_delivered()
-
         sys.stdout = sys.__stdout__
-
         self.assertEqual(self.order.status, "Pending")
         self.assertEqual(captured_output.getvalue().strip(),
                          "Order must be completed before marking as delivered.")
@@ -111,6 +107,97 @@ class TestOrder(unittest.TestCase):
         self.assertNotEqual(len(rows), 0)
         if len(rows) > 0:
             self.assertNotEqual(rows[0][0], "order_id")
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_load_orders_from_csv(self, mock_file):
+        # Create CSV data with proper formatting (no leading spaces)
+        csv_data = """order_id,user_email,shipping_address,payment_method,items,total_price,status
+    f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00,Pending"""
+
+        mock_file.return_value.__iter__.return_value = csv_data.splitlines()
+
+        class MockReader:
+            def __init__(self, data):
+                self.data = data
+                self.index = 0
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                if self.index >= len(self.data):
+                    raise StopIteration
+                row = self.data[self.index]
+                self.index += 1
+                return row
+
+        reader_data = [
+            ["order_id", "user_email", "shipping_address", "payment_method", "items", "total_price", "status"],
+            ["f47ac10b-58cc-4372-a567-0e02b2c3d479", "test@example.com", "123 Tel Aviv", "Credit card",
+             "Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00)", "$200.00", "Pending"]
+        ]
+
+        mock_reader = MockReader(reader_data)
+
+        with patch('csv.reader', return_value=mock_reader):
+            with patch('builtins.print') as mock_print:
+                orders = Order.load_orders_from_csv("test_orders.csv")
+
+                self.assertEqual(len(orders), 1)
+                self.assertEqual(orders[0]["order_id"], "f47ac10b-58cc-4372-a567-0e02b2c3d479")
+                self.assertEqual(orders[0]["user_email"], "test@example.com")
+                self.assertEqual(orders[0]["status"], "Pending")
+                self.assertEqual(orders[0]["items"], ["Chair x 2 ($20.00)", "Table x 1 ($80.00)", "Bed x 1 ($100.00)"])
+
+                mock_print.assert_called_with("Orders loaded successfully from CSV.")
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_load_orders_from_csv_file_not_found(self, mock_file):
+        # Simulate FileNotFoundError
+        mock_file.side_effect = FileNotFoundError
+
+        # Call the method
+        orders = Order.load_orders_from_csv("non_existing_file.csv")
+
+        # Ensure the orders list is empty
+        self.assertEqual(orders, [])
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_load_orders_from_csv_malformed_data(self, mock_file):
+        csv_data = """order_id,user_email,shipping_address,payment_method,items,total_price
+                     f47ac10b-58cc-4372-a567-0e02b2c3d479,test@example.com,123 Tel Aviv,Credit card,Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00),$200.00"""
+
+        mock_file.return_value.__iter__.return_value = csv_data.splitlines()
+
+        # Create a properly formatted mock reader that behaves like an iterator
+        class MockReader:
+            def __init__(self, data):
+                self.data = data
+                self.index = 0
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                if self.index >= len(self.data):
+                    raise StopIteration
+                row = self.data[self.index]
+                self.index += 1
+                return row
+
+        reader_data = [
+            ["order_id", "user_email", "shipping_address", "payment_method", "items", "total_price"],
+            ["f47ac10b-58cc-4372-a567-0e02b2c3d479", "test@example.com", "123 Tel Aviv", "Credit card",
+             "Chair x 2 ($20.00)|Table x 1 ($80.00)|Bed x 1 ($100.00)", "$200.00"]
+        ]
+
+        mock_reader = MockReader(reader_data)
+
+        with patch('csv.reader', return_value=mock_reader):
+            with patch('builtins.print') as mock_print:
+                orders = Order.load_orders_from_csv("test_orders.csv")
+                self.assertEqual(len(orders), 0)
+                mock_print.assert_called_with("Orders loaded successfully from CSV.")
 
 
 if __name__ == '__main__':
