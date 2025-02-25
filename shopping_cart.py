@@ -135,6 +135,7 @@ class ShoppingCart:
         print("\nStarting checkout process...")
         print(f"Shipping to: {self.user.address}")
         print(f"Payment method: {self.user.payment_method}")
+        print(f"Current inventory before update: {self.inventory.items_by_type}")
 
         # Validate items against inventory
         for item, quantity in self.cart_items.items():
@@ -145,8 +146,13 @@ class ShoppingCart:
                 print(f"Not enough stock for {item.name}. Available: {available_quantity}, Requested: {quantity}")
                 return None
 
+        if not self.cart_items:
+            print("Checkout failed: Cart is empty.")
+            return None
+
         # Apply discounts and calculate final total
         total_price = self.calculate_total()
+
         if total_price == 0:
             print("Checkout failed: Total price is 0.")
             return None
@@ -170,11 +176,12 @@ class ShoppingCart:
         # Create and complete order
         order = Order(user=self.user, items=self.cart_items.copy(), total_price=total_price)
         order.complete_order()
+        print(f" Cart content before checkout: {self.cart_items}")
+
         order.save_order_to_csv()  # Saving the current order to the CSV file
 
         self.clear_cart_from_csv()  # Delete the user's current ordered cart from the carts' CSV file
         self.user.add_order_to_history(order)  # Save order to user's order history
-
         print("Checkout completed successfully!")
         print(order)
 

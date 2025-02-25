@@ -75,19 +75,23 @@ class Inventory:
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
 
-    def update_quantity(self, name: str, furniture_type: str, quantity: int):
+    def update_quantity(self, name: str, furniture_type: str, new_quantity: int) -> bool:
         """
         Update the available quantity of a specific furniture item.
 
         param name: Name of the furniture item to update.
         param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
-        param quantity: New quantity to set for the item.
+        param new_quantity: New quantity to set for the item.
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
-            self.items_by_type[furniture_type][name].available_quantity = quantity
+            self.items_by_type[furniture_type][name].available_quantity = new_quantity
+
             self.notify_observers(self.items_by_type[furniture_type][name], "updated")
+            print(f" Successfully updated {name} to quantity {new_quantity}")
+            return True
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
+            return False
 
     def search_by_type(self, furniture_type: str):
         """
