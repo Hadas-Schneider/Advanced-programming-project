@@ -5,7 +5,7 @@ name: Python Lint Flake8
 
 on:
   push:
-    branches: [ "feature/discount" ]
+    branches: [ "feature/discount", "feature/order" ]
   pull_request:
     branches: [ "Classes" ]
 
