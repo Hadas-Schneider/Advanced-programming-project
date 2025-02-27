@@ -29,7 +29,7 @@ def home():
             "/user/register",
             "/user/login",
             "/cart/view",
-            "/cart/add",
+            "/cart/update",
             "/cart/remove",
             "/cart/checkout",
             "/furniture"
@@ -86,7 +86,7 @@ def get_furniture():
 
 
 # Add item to shopping cart
-@app.route("/cart/add", methods=["POST"])
+@app.route("/cart/add", methods=["PUT"])
 @auth.login_required
 def add_to_cart():
     """Adding an item to the cart"""
@@ -97,6 +97,11 @@ def add_to_cart():
     furniture_type = data.get("type")
     quantity = int(data.get("quantity", 1))
 
+    if user.email not in orders:
+        orders[user.email] = ShoppingCart(user, inventory)
+
+    cart = orders[user.email]
+
     item = inventory.items_by_type.get(furniture_type, {}).get(item_name)
     if not item:
         return jsonify({"error": f"Item '{item_name}' of type '{furniture_type}' not found in inventory."}), 404
@@ -104,12 +109,7 @@ def add_to_cart():
     if item.available_quantity < quantity:
         return jsonify({"error": f"Not enough stock for {item_name}. Only {item.available_quantity} left."}), 400
 
-    if user.email not in orders:
-        orders[user.email] = ShoppingCart(user, inventory)
-
-    cart = orders[user.email]
     cart.add_item(item, quantity)
-
     return jsonify({'message': f"{quantity} x {item_name} added to cart."}), 200
 
 
@@ -124,13 +124,12 @@ def view_cart():
     return jsonify(cart.view_cart())
 
 
-@app.route("/cart/remove", methods=["POST"])  # Remove item from cart
+@app.route("/cart/remove", methods=["DELETE"])  # Remove item from cart
 @auth.login_required
 def remove_item_from_cart():
     """Remove an item from the cart"""
     user = auth.current_user()
     data = request.json
-    print("Request received:", data)
 
     if "item_name" not in data or not data["item_name"]:
         return jsonify({"error": "Item name is missing in request."}), 400

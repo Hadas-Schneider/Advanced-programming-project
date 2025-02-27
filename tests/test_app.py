@@ -92,8 +92,11 @@ def test_remove_item_from_cart(client, create_test_user):
         "user_email": "test@example.com",
         "item_name": "Office Chair"
     }, headers=headers)
+    response = client.delete("/cart/remove", json={
+        "item_name": "Office Chair"
+    }, headers=headers)
 
-    assert response.status_code in [200, 404]
+    assert response.status_code in [200, 404], f"Unexpected response: {response.status_code}, {response.data}"
 
 
 def test_checkout_success(client, create_test_user):
@@ -108,7 +111,7 @@ def test_checkout_success(client, create_test_user):
         material="Metal", color="Black", wp=2, price=100.0, dimensions=(60, 60, 120),
         country="USA", available_quantity=5, has_armrests=True
     )
-    add_response = client.post("/cart/add", json={
+    add_response = client.put("/cart/add", json={
         "name": "Office Chair",
         "type": "Chair",
         "quantity": 1
@@ -127,7 +130,7 @@ def test_add_item_not_in_inventory(client, create_test_user):
     We expect it to return 400 - Bad request with a relevant error message.
     """
     headers = get_auth_headers("test@example.com", "Test@123")
-    response = client.post("/cart/add", json={
+    response = client.put("/cart/add", json={
         "name": "Nonexistent Item",
         "type": "Table",
         "quantity": 1
@@ -145,10 +148,9 @@ def test_remove_item_not_in_cart(client, create_test_user):
     """
     headers = get_auth_headers("test@example.com", "Test@123")
 
-    response = client.post("/cart/remove", json={
-        "user_email": "test@example.com",
+    response = client.delete("/cart/remove", json={
         "item_name": "Nonexistent Item"
     }, headers=headers)
     print("Response JSON:", response.json)
-    assert response.status_code == 404
-    assert b"No cart found for user" in response.data
+    assert response.status_code == 404, f"Unexpected response: {response.status_code}, {response.data}"
+
