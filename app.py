@@ -31,8 +31,9 @@ def home():
             "/cart/view",
             "/cart/add",
             "/cart/remove",
-            "/cart/checkout"
-                   ]
+            "/cart/checkout",
+            "/furniture"
+        ]
     })
 
 
