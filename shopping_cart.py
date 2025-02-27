@@ -91,6 +91,8 @@ class ShoppingCart:
         param item: Furniture object to remove.
         param quantity: Quantity to remove (default: 1).
         """
+        if item is None:
+            raise KeyError("Item not found in inventory.")
         if item not in self.cart_items:
             raise KeyError(f"Item '{item.name}' is not in the cart.")
 
@@ -172,7 +174,6 @@ class ShoppingCart:
                 print(f" {quantity} units of '{item.name}' have been deducted from inventory.")
             else:
                 print(f" Warning: Could not update stock for '{item.name}'.")
-
         # Create and complete order
         order = Order(user=self.user, items=self.cart_items.copy(), total_price=total_price)
         order.complete_order()
