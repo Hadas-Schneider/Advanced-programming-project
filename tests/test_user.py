@@ -14,7 +14,7 @@ class TestUser(unittest.TestCase):
                          password="Strong@123",
                          address="123 Main St",
                          payment_method="PayPal")
-        self.test_filename = "users_database2.csv"
+        self.test_filename = "users_database.csv"
 
     def test_user_creation(self):
         """Test user initialization with valid inputs"""
