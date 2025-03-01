@@ -27,7 +27,7 @@ class TestUser(unittest.TestCase):
 
     def test_password_validation(self):
         """Test password validation rules"""
-        self.assertTrue(self.user.validate_password("Strong@123")) # Password is legal
+        self.assertTrue(self.user.validate_password("Strong@123"))  # Password is legal
         self.assertFalse(User.validate_password("Strong"))  # Password is too short
         self.assertFalse(User.validate_password("Strong123"))  # Password doesn't contain special character
 
@@ -132,8 +132,9 @@ class TestUser(unittest.TestCase):
     def test_save_exists_to_csv(self):
         """Test that existing user is correctly saved to the CSV file after changes."""
         # Ensure the user instance is saved to the file
-        existing_user = User.load_from_csv(self.test_filename, "Avi Cohen", "avicohen@example.com",
-                                         "123 Main St")
+        existing_user = User.load_from_csv(
+            self.test_filename, "Avi Cohen", "avicohen@example.com", "123 Main St"
+        )
         existing_user.update_profile(address="456 Elm St")
         order = Order(user=existing_user, items={"Table": 1, "Chair": 1}, total_price=200)
         existing_user.add_order_to_history(order)
@@ -168,6 +169,7 @@ class TestUser(unittest.TestCase):
 
         # Compare the expected data with the found row
         self.assertEqual(user_row, expected_data)
+
 
 if __name__ == '__main__':
     unittest.main()
