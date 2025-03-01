@@ -217,7 +217,7 @@ class User:
 
                 for row in reader:
                     (csv_name, csv_email, password, salt, csv_hashed_password,
-                     csv_address,payment_method, order_history, wishlist) = row
+                      csv_address, payment_method, order_history, wishlist) = row
 
                     # Match user by name, email, and address
                     if csv_name == name and csv_email == email and csv_address == address:
