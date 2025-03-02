@@ -23,11 +23,23 @@ def verify_password(email, password):
 
 @app.route("/")
 def home():
-    return "Welcome to the Online Furniture Store API!"
+    return jsonify({
+        "message":"Welcome to the Online Furniture Store API!",
+        "endpoints": [
+            "/user/register",
+            "/user/login",
+            "/cart/view",
+            "/cart/update",
+            "/cart/remove",
+            "/cart/checkout",
+            "/furniture"
+        ]
+    })
 
 
 @app.route("/user/register", methods=["POST"])  # User Registration
 def register_user():
+    """Register a new user to the system"""
     data = request.json
     email = data["email"]
     if email in users:
@@ -46,11 +58,11 @@ def register_user():
 
 @app.route("/user/login", methods=["POST"])  # User login
 def login_user():
+    """The user logs into the system with his details"""
     data = request.json
     email = data.get("email")
-    password = data.get("password")
-
     user = users.get(email)
+    password = data.get("password")
     if not user:
         return jsonify({"error": "User email not found."}), 404
 
@@ -74,15 +86,21 @@ def get_furniture():
 
 
 # Add item to shopping cart
-@app.route("/cart/add", methods=["POST"])
+@app.route("/cart/add", methods=["PUT"])
 @auth.login_required
 def add_to_cart():
+    """Adding an item to the cart"""
     user = auth.current_user()
     data = request.json
 
     item_name = data.get("name")
     furniture_type = data.get("type")
     quantity = int(data.get("quantity", 1))
+
+    if user.email not in orders:
+        orders[user.email] = ShoppingCart(user, inventory)
+
+    cart = orders[user.email]
 
     item = inventory.items_by_type.get(furniture_type, {}).get(item_name)
     if not item:
@@ -91,12 +109,7 @@ def add_to_cart():
     if item.available_quantity < quantity:
         return jsonify({"error": f"Not enough stock for {item_name}. Only {item.available_quantity} left."}), 400
 
-    if user.email not in orders:
-        orders[user.email] = ShoppingCart(user, inventory)
-
-    cart = orders[user.email]
     cart.add_item(item, quantity)
-
     return jsonify({'message': f"{quantity} x {item_name} added to cart."}), 200
 
 
@@ -111,28 +124,44 @@ def view_cart():
     return jsonify(cart.view_cart())
 
 
-@app.route("/cart/remove", methods=["POST"])  # Remove item from cart
+@app.route("/cart/remove", methods=["DELETE"])  # Remove item from cart
 @auth.login_required
 def remove_item_from_cart():
+    """Remove an item from the cart"""
     user = auth.current_user()
     data = request.json
-    item_name = data.get("name")
 
-    cart = orders.get(user.email)
-    if not cart:
+    if "item_name" not in data or not data["item_name"]:
+        return jsonify({"error": "Item name is missing in request."}), 400
+
+    item_name = data["item_name"]
+
+    if user.email not in orders or not orders[user.email].cart_items:
         return jsonify({"error": "No cart found for user."}), 404
 
-    cart.remove_item(item_name)
-    return jsonify({"message": f"{item_name} removed from cart."}), 200
+    # Prepare the cart
+    cart = orders[user.email]
+    print(f" Cart before removal: {cart.cart_items}")
+
+    item = next((i for i in cart.cart_items.keys() if i.name == item_name), None)
+    if not item:
+        print(f"Item '{item_name}' not found in cart!")
+        return jsonify({"error": f"Item '{item_name}' is not in the cart."}), 404
+
+    cart.remove_item(item)
+    print(f"Item '{item_name}' removed successfully.")
+    return jsonify({"message": f"Removed {item_name} from cart."}), 200
 
 
 @app.route('/cart/checkout', methods=['POST'])  # Checkout an order
 @auth.login_required
 def checkout():
     user = auth.current_user()
-    cart = orders.get(user.email)
-    if not cart or not cart.cart_items:
+    if user.email not in orders:
+        print("Checkout failed- Cart is empty")
         return jsonify({"error": "Cart is empty"}), 400
+
+    cart = orders[user.email]
 
     print("\n🔹 Starting checkout process...")
     print(f"🔹 Shipping to: {user.address}")
@@ -141,6 +170,7 @@ def checkout():
     order = cart.checkout()  # Using The Checkout method from Shopping_cart.py
 
     if not order:
+        print("Checkout failed - Possible stock issue or payment failure.")
         return jsonify({"error": "Checkout failed. Please check stock availability or payment method."}), 400
 
     return jsonify({
@@ -150,8 +180,7 @@ def checkout():
         "status": order.status,
         "payment_method": user.payment_method,
         "items": [{"name": item.name, "quantity": quantity} for item, quantity in order.items.items()]
-
-    })
+    }), 200
 
 
 if __name__ == '__main__':

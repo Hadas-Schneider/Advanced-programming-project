@@ -1,0 +1,2 @@
+order_id,user_email,shipping_address,payment_method,items,total_price,status
+853583f7-cb4f-4336-8d09-9aebe1908f42,test@example.com,123 Test St,Credit Card,Office Chair x 1 ($100.00),$112.10,Completed
