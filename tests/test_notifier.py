@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from inventory import InventoryObserver
 from inventory import LowStockNotifier
 
+
 class TestLowStockNotifier(unittest.TestCase):
     def test_abstract_class_cannot_be_instantiated(self):
         with self.assertRaises(TypeError):
@@ -24,13 +25,13 @@ class TestLowStockNotifier(unittest.TestCase):
     def test_update_low_stock_added(self, mock_stdout):
         self.mock_item.available_quantity = 3
         self.default_notifier.update(self.mock_item, "added")
-        self.assertIn(f"Warning: Low stock for Test Item! Only 3 left.", mock_stdout.getvalue())
+        self.assertIn("Warning: Low stock for Test Item! Only 3 left.", mock_stdout.getvalue())
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_update_low_stock_updated(self, mock_stdout):
         self.mock_item.available_quantity = 2
         self.default_notifier.update(self.mock_item, "updated")
-        self.assertIn(f"Warning: Low stock for Test Item! Only 2 left.", mock_stdout.getvalue())
+        self.assertIn("Warning: Low stock for Test Item! Only 2 left.", mock_stdout.getvalue())
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_update_sufficient_stock(self, mock_stdout):
@@ -49,7 +50,7 @@ class TestLowStockNotifier(unittest.TestCase):
         self.mock_item.available_quantity = 8
         # This should trigger a warning with the custom threshold (10)
         self.custom_notifier.update(self.mock_item, "updated")
-        self.assertIn(f"Warning: Low stock for Test Item! Only 8 left.", mock_stdout.getvalue())
+        self.assertIn("Warning: Low stock for Test Item! Only 8 left.", mock_stdout.getvalue())
 
         # Clear the mock
         mock_stdout.truncate(0)
@@ -62,5 +63,3 @@ class TestLowStockNotifier(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

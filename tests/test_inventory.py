@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from io import StringIO
@@ -19,6 +18,7 @@ class Furniture:
         self.price = price
         self.available_quantity = available_quantity
 
+
 class TestInventory(unittest.TestCase):
     def setUp(self):
         self.inventory = Inventory()
@@ -31,7 +31,7 @@ class TestInventory(unittest.TestCase):
             color="Black",
             wp=1,
             price=199.99,
-            dimensions=(60,60,100),
+            dimensions=(60, 60, 100),
             country="USA",
             available_quantity=10,
             has_armrests=True
@@ -45,7 +45,7 @@ class TestInventory(unittest.TestCase):
             color="Black",
             wp=1,
             price=99.99,
-            dimensions=(20,40,90),
+            dimensions=(20, 40, 90),
             country="USA",
             available_quantity=6,
             has_armrests=True
@@ -293,7 +293,7 @@ class TestInventory(unittest.TestCase):
         self.assertEqual(item['color'], "Black")
         self.assertEqual(item['warranty_period'], 1)
         self.assertEqual(item['price'], 199.99)
-        self.assertEqual(item['dimensions'], (60,60,100))
+        self.assertEqual(item['dimensions'], (60, 60, 100))
         self.assertEqual(item['country'], "USA")
         self.assertEqual(item['type'], "Chair")
         self.assertEqual(item['available_quantity'], 10)
