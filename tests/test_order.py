@@ -154,13 +154,8 @@ class TestOrder(unittest.TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
     def test_load_orders_from_csv_file_not_found(self, mock_file):
-        # Simulate FileNotFoundError
         mock_file.side_effect = FileNotFoundError
-
-        # Call the method
         orders = Order.load_orders_from_csv("non_existing_file.csv")
-
-        # Ensure the orders list is empty
         self.assertEqual(orders, [])
 
     @patch('builtins.open', new_callable=mock_open)

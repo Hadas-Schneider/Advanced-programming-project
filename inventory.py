@@ -8,7 +8,7 @@ class InventoryObserver(ABC):
     """
 
     @abstractmethod
-    def update(self, item, change_type):
+    def update(self, item: Furniture, change_type):
         pass
 
 
@@ -19,9 +19,9 @@ class LowStockNotifier(InventoryObserver):
     def __init__(self, threshold=5):
         self.threshold = threshold
 
-    def update(self, item, change_type):
+    def update(self, item: Furniture, change_type: str):
         if change_type in ("added", "updated") and item.available_quantity <= self.threshold:
-            print(f" Warning: Low stock for {item.name}! Only {item.available_quantity} left.")
+            print(f"Warning: Low stock for {item.name}! Only {item.available_quantity} left.")
 
 
 class Inventory:
@@ -42,7 +42,7 @@ class Inventory:
     def remove_observer(self, observer: InventoryObserver):
         self.observers.remove(observer)
 
-    def notify_observers(self, item, change_type):
+    def notify_observers(self, item: Furniture, change_type):
         for observer in self.observers:
             observer.update(item, change_type)
 
@@ -118,7 +118,7 @@ class Inventory:
         """
         all_items = []
         for furniture_type, items in self.items_by_type.items():
-            for item in items.items():
+            for item in items.values():
                 all_items.append({
                     'id': item.u_id,
                     'name': item.name,
