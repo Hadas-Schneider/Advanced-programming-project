@@ -186,25 +186,25 @@ def test_save_cart_to_csv_via_api(mock_save_cart, client, create_test_user):
         "quantity": 2
     }, headers=headers)
 
-    print("📌 Calling /cart/save API...")
     # Sending the CSV through the API
     response = client.post("/cart/save", headers=headers)
-
-    print("📌 Checking if save_cart_to_csv was called...")
     mock_save_cart.assert_called_once()
-    print(" save_cart_to_csv was called!")
-    
+
     assert response.status_code == 200
     assert response.json["message"] == "Cart saved successfully!"
 
 
-@patch("shopping_cart.open", new_callable=mock_open, read_data="user_email,item_name,quantity,price\n"                                                 "test@example.com,Office Chair,2,100.0\n")
-def test_load_cart_from_csv_via_api(mock_file, client, create_test_user):
+@patch("shopping_cart.open", new_callable=mock_open, read_data="user_email,item_name,quantity,price\n"
+                                                               "test@example.com,Office Chair,2,100.0\n")
+@patch("os.path.exists", return_value=True)
+def test_load_cart_from_csv_via_api(mock_exists, mock_file, client, create_test_user):
     """ Testing that the cart loads from the CSV through our Flask API"""
     headers = get_auth_headers("test@example.com", "Test@123")
 
     # Loading the cart from CSV
     response = client.get("/cart/load", headers=headers)
+
     assert response.status_code == 200
     assert "cart" in response.json
     mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")
+

@@ -206,7 +206,9 @@ def load_cart_from_csv():
 
     cart = orders[user.email]
     cart.load_cart_from_csv()
-    return jsonify({"message": "Cart Loaded Successfully!", "cart": cart.cart_items}), 200
+    return jsonify({"message": "Cart Loaded Successfully!",
+                    "cart": {item.name: quantity for item, quantity in cart.cart_items.items()}
+                    }), 200
 
 
 if __name__ == '__main__':
