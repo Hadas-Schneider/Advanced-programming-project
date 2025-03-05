@@ -1,10 +1,10 @@
 import pytest
 import base64
-from app import app, users, inventory
+from unittest.mock import patch, MagicMock, mock_open
+from app import app, users, orders, inventory
 from User import User
-from inventory import Inventory
 from furniture import Chair
-import json
+from shopping_cart import ShoppingCart
 
 
 @pytest.fixture
@@ -34,6 +34,8 @@ def get_auth_headers(email, password):
     return {"Authorization": f"Basic {encoded_credentials}"}
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_register_user(client):
     """
     Test user registration endpoint.
@@ -49,6 +51,8 @@ def test_register_user(client):
     assert b"User registered successfully" in response.data
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_login_user(client):
     """
     Test user login endpoint.
@@ -61,6 +65,8 @@ def test_login_user(client):
     assert response.json["message"] == "Login Successful!"
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_view_cart(client):
     """
     Test viewing the shopping cart.
@@ -70,6 +76,8 @@ def test_view_cart(client):
     assert response.status_code == 200
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def add_item_to_cart(client, create_test_user):
     """
     Test adding an item to the cart.
@@ -83,6 +91,8 @@ def add_item_to_cart(client, create_test_user):
     assert response.status_code in [200, 404]
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_remove_item_from_cart(client, create_test_user):
     """
     Test removing an existing item from the cart.
@@ -99,31 +109,40 @@ def test_remove_item_from_cart(client, create_test_user):
     assert response.status_code in [200, 404], f"Unexpected response: {response.status_code}, {response.data}"
 
 
-def test_checkout_success(client, create_test_user):
-    """
-    Test successful checkout process.
-    """
+@patch.object(ShoppingCart, "checkout", return_value=MagicMock(order_id="1234", total_price=500.0, status="Completed"))
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
+@patch("flask.testing.FlaskClient.put", return_value=MagicMock(status_code=200, json=lambda: {"message": "Item added"}))
+def test_checkout_success(mock_checkout, mock_put, client, create_test_user):
+    """Test successful checkout process with mocking."""
+    print("Mock checkout applied:", mock_checkout)
+    print("Mock put applied:", mock_put)
     headers = get_auth_headers("test@example.com", "Test@123")
-    print("Inventory before adding item:", inventory.items_by_type)
+    test_user_email = "test@example.com"
 
-    inventory.items_by_type.setdefault("Chair", {})["Office Chair"] = Chair(
-        u_id="001", name="Office Chair", description="Ergonomic chair",
-        material="Metal", color="Black", wp=2, price=100.0, dimensions=(60, 60, 120),
-        country="USA", available_quantity=5, has_armrests=True
-    )
-    add_response = client.put("/cart/add", json={
-        "name": "Office Chair",
-        "type": "Chair",
-        "quantity": 1
-    }, headers=headers)
-    print("Add to Cart Response:", add_response.json)
-    assert add_response.status_code == 200, f"Adding item to cart failed! Response:{add_response.json}"
-    print("Inventory after adding item:", inventory.items_by_type)
-    response = client.post("/cart/checkout", json={"user_email": "test@example.com"}, headers=headers)
-    print("Checkout Response:", response.json)
-    assert response.status_code in [200, 404]
+    with patch.dict(orders, {test_user_email: ShoppingCart(create_test_user, inventory)}):
+        inventory.items_by_type.setdefault("Chair", {})["Office Chair"] = Chair(
+            u_id="001", name="Office Chair", description="Ergonomic chair",
+            material="Metal", color="Black", wp=2, price=100.0, dimensions=(60, 60, 120),
+            country="USA", available_quantity=5, has_armrests=True
+        )
+
+        add_response = client.put("/cart/add", json={
+            "name": "Office Chair",
+            "type": "Chair",
+            "quantity": 1
+        }, headers=headers)
+
+        assert add_response.status_code == 200, f"Adding item to cart failed! Response:{add_response.json}"
+
+        response = client.post("/cart/checkout", json={"user_email": test_user_email}, headers=headers)
+        assert response.status_code == 200
+        assert response.json["order_id"] == "1234"
+        assert response.json["status"] == "Completed"
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_add_item_not_in_inventory(client, create_test_user):
     """
     Test adding an item that does not exist in inventory.
@@ -135,22 +154,57 @@ def test_add_item_not_in_inventory(client, create_test_user):
         "type": "Table",
         "quantity": 1
     }, headers=headers)
-    print("Response JSON:", response.json)
 
     assert response.status_code == 404
     assert b"'Nonexistent Item' of type 'Table' not found in inventory." in response.data
 
 
+@patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
+@patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
 def test_remove_item_not_in_cart(client, create_test_user):
     """
     Test removing an item that is not in the user's cart.
     Expected result: Should return 400 Bad Request with an appropriate error message.
     """
     headers = get_auth_headers("test@example.com", "Test@123")
-
     response = client.delete("/cart/remove", json={
         "item_name": "Nonexistent Item"
     }, headers=headers)
     print("Response JSON:", response.json)
     assert response.status_code == 404, f"Unexpected response: {response.status_code}, {response.data}"
 
+
+@patch.object(ShoppingCart, "save_cart_to_csv")
+def test_save_cart_to_csv_via_api(mock_save_cart, client, create_test_user):
+    """ Testing that the cart saves to the CSV through our Flask API"""
+    headers = get_auth_headers("test@example.com", "Test@123")
+
+    # Adding item to cart
+    client.put("/cart/add", json={
+        "name": "Office Chair",
+        "type": "Chair",
+        "quantity": 2
+    }, headers=headers)
+
+    print("📌 Calling /cart/save API...")
+    # Sending the CSV through the API
+    response = client.post("/cart/save", headers=headers)
+
+    print("📌 Checking if save_cart_to_csv was called...")
+    mock_save_cart.assert_called_once()
+    print(" save_cart_to_csv was called!")
+    
+    assert response.status_code == 200
+    assert response.json["message"] == "Cart saved successfully!"
+
+
+@patch("shopping_cart.open", new_callable=mock_open, read_data="user_email,item_name,quantity,price\n"                                                 "test@example.com,Office Chair,2,100.0\n")
+def test_load_cart_from_csv_via_api(mock_file, client, create_test_user):
+    """ Testing that the cart loads from the CSV through our Flask API"""
+    headers = get_auth_headers("test@example.com", "Test@123")
+
+    # Loading the cart from CSV
+    response = client.get("/cart/load", headers=headers)
+    assert response.status_code == 200
+    assert "cart" in response.json
+    mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")

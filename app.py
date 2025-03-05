@@ -183,5 +183,31 @@ def checkout():
     }), 200
 
 
+@app.route('/cart/save', methods=['POST'])
+@auth.login_required()
+def save_cart_to_csv():
+    """Save the shopping cart to CSV"""
+    user = auth.current_user()
+    if user.email not in orders:
+        return jsonify({"error": "No cart found for user."}), 404
+    cart = orders[user.email]
+    cart.save_cart_to_csv()
+    return jsonify({"message": "Cart saved successfully!"}), 200
+
+
+@app.route('/cart/load', methods=['GET'])
+@auth.login_required
+def load_cart_from_csv():
+    """Load the user's shopping cart from CSV"""
+    user = auth.current_user()
+
+    if user.email not in orders:
+        orders[user.email] = ShoppingCart(user, inventory)
+
+    cart = orders[user.email]
+    cart.load_cart_from_csv()
+    return jsonify({"message": "Cart Loaded Successfully!", "cart": cart.cart_items}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)

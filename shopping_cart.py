@@ -247,10 +247,10 @@ class ShoppingCart:
         with open(filename, mode="w", newline="") as file:
             writer = csv.writer(file, lineterminator="\n")
             # Write all new updated rows to file
-            writer.writerow(expected_header)
+            # writer.writerow(expected_header)
             writer.writerows(temp_data)
             # Replace the old file with the updated one
-            print(f"Cart for {self.user.email} {'Updated' if user_exists else 'Saved'} to CSV.")
+        print(f"Cart for {self.user.email} {'Updated' if user_exists else 'Saved'} to CSV.")
 
     def load_cart_from_csv(self, filename: str = "cart_data.csv") -> None:
         """
