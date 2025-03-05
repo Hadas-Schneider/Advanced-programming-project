@@ -1,10 +1,11 @@
-from furniture import Furniture, FurnitureFactory
-from furniture import DiscountStrategy, NoDiscount
+from typing import Dict, List, Optional
+import csv
+import os
+from User import User
+from furniture import Furniture, DiscountStrategy, NoDiscount
 from order import Order
 from inventory import Inventory
 from abc import ABC, abstractmethod
-import csv
-import os
 
 
 class CartObserver(ABC):
@@ -12,7 +13,7 @@ class CartObserver(ABC):
     Abstract observer for monitoring cart changes.
     """
     @abstractmethod
-    def update(self, cart, change_type, item=None):
+    def update(self, cart: 'ShoppingCart', change_type: str, item: Optional[Furniture] = None) -> None:
         pass
 
 
@@ -20,7 +21,7 @@ class CartNotifier(CartObserver):
     """
     Notifies when an item is added or removed from the cart.
     """
-    def update(self, cart, change_type, item=None):
+    def update(self, cart: 'ShoppingCart', change_type: str, item: Optional[Furniture] = None) -> None:
         if change_type == "added":
             print(f"Item '{item.name}' added to cart. ")
         elif change_type == "removed":
@@ -33,34 +34,34 @@ class ShoppingCart:
     Handles adding/removing items, calculating totals, and applying discounts.
     """
 
-    def __init__(self, user, inventory: Inventory, discount_strategy: DiscountStrategy = NoDiscount()):
+    def __init__(self, user: User, inventory: Inventory, discount_strategy: DiscountStrategy = NoDiscount()) -> None:
         """
-        Initialize a ShoppingCart object.
+        Initialize a ShoppingCart object (representing a shopping cart for a user).
 
         param user: User object associated with the cart.
         param inventory : Inventory object to check the items' stock levels
         param discount_strategy : Discount strategy to apply to the entire cart (The default is No Discount).
         """
-        self.user = user
-        self.inventory = inventory
-        self.cart_items = {}  # {Furniture: quantity}
-        self.discount_strategy = discount_strategy  # We assume no discount to start with
-        self.observers = []
+        self.user: User = user
+        self.inventory: Inventory = inventory
+        self.cart_items: Dict[Furniture, int] = {}  # {Furniture: quantity}
+        self.discount_strategy: DiscountStrategy = discount_strategy  # We assume no discount to start with
+        self.observers: List[CartObserver] = []
 
-    def add_observer(self, observer: CartObserver):
+    def add_observer(self, observer: CartObserver) -> None:
         self.observers.append(observer)
 
-    def notify_observers(self, change_type, item=None):
+    def notify_observers(self, change_type: str, item: Optional[Furniture] = None) -> None:
         for observer in self.observers:
             observer.update(self, change_type, item)
 
-    def set_cart_discount_strategy(self, discount_strategy: DiscountStrategy):
+    def set_cart_discount_strategy(self, discount_strategy: DiscountStrategy) -> None:
         """
         Set a discount strategy for the entire cart.This will be used as the last step in the checkout.
         """
-        self.discount_strategy = discount_strategy
+        self.discount_strategy: DiscountStrategy = discount_strategy
 
-    def add_item(self, item: Furniture, quantity=1):
+    def add_item(self, item: Furniture, quantity: int = 1) -> None:
         """
         Add a furniture item to the cart or update its quantity.
 
@@ -84,7 +85,7 @@ class ShoppingCart:
 
         self.notify_observers("added", item)
 
-    def remove_item(self, item: Furniture, quantity=1):
+    def remove_item(self, item: Furniture, quantity: int = 1) -> None:
         """
         Remove a furniture item or reduce its quantity in the cart.
 
@@ -103,7 +104,7 @@ class ShoppingCart:
 
         self.notify_observers("removed", item)
 
-    def view_cart(self):
+    def view_cart(self) -> None:
         """
         Display all items in the cart, their quantities, and prices.
         """
@@ -116,10 +117,13 @@ class ShoppingCart:
             print(f"- {item.name}: {quantity} x ${item.price:.2f} = ${item.price * quantity:.2f}")
         print(f"Total: ${self.calculate_total():.2f}")
 
-    def calculate_total(self, tax_percentage=18):
+    def calculate_total(self, tax_percentage: float = 18) -> float:
         """
         Calculate the total price of all items in the cart after applying individual and cart-wide discounts.
-        return: Total price as a float.
+        Args:
+        tax_percentage (float): The tax rate to apply to the total after discounts.
+
+        returns: float: Total price as a float including discounts and tax.
         """
         total = sum(item.apply_discount(item.discount_strategy) * quantity
                     for item, quantity in self.cart_items.items())
@@ -129,7 +133,7 @@ class ShoppingCart:
 
         return round(total_with_tax, 2)
 
-    def checkout(self):
+    def checkout(self) -> Optional[Order]:
         """
         Perform the checkout process.
         return: Order object if successful, None if checkout fails.
@@ -190,61 +194,102 @@ class ShoppingCart:
         return order
 
     @staticmethod
-    def process_payment(user, amount):
+    def process_payment(user: User, amount: float) -> bool:
         """
         Mock payment processing.
-        param amount:The user and the Amount to process.
-        return: True if payment is successful, False otherwise.
+        Args:
+            user (User): The user object which includes payment details.
+            amount (float): The amount to process for payment.
+        Returns:
+        True (bool) if payment is successful, False otherwise.
         """
         print(f"Processing payment of ${amount:.2f} using {user.payment_method}...")
         return True  # Simulate a successful payment
 
-    def save_cart_to_csv(self, filename="carts.csv"):
+    def save_cart_to_csv(self, filename: str = "cart_data.csv") -> None:
         """
         Save the shopping cart of the user to a CSV file.
-        Each user's cart is saved separately using their email as an identifier.
+        If the user already exists in the file, update their entry.
         """
-        rows = []
+        expected_header = ["user_email", "item_name", "quantity", "price"]
+        temp_data = []
+        user_exists = False
 
+        # Reading the current data
         if os.path.exists(filename):
-            with open(filename, mode="r", newline="") as file:
+            with open(filename, mode='r', newline='') as file:
                 reader = csv.reader(file)
-                rows = [row for row in reader if row and row[0] != self.user.email]
+                headers = next(reader, None)
 
+                if headers != expected_header:
+                    print("Incorrect CSV header detected! Overwriting file.")
+                    temp_data.append(expected_header)
+                else:
+                    temp_data.append(headers)
+
+                for row in reader:
+                    if row and row[0] == self.user.email:
+                        user_exists = True
+                        continue
+                    else:
+                        temp_data.append(row)
+
+        # Checking if user already exists to decide if to add or just update his data
+        if not user_exists:
+            print(f"Adding new cart for {self.user.email} to CSV.")
+        else:
+            print(f"Updating existing cart for {self.user.email} in CSV.")
+        # Add new user's data
+        for item, quantity in self.cart_items.items():
+            temp_data.append([self.user.email, item.name, quantity, item.price])
+
+        # Writing the new data
         with open(filename, mode="w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow(["user_email", "item_name", "quantity", "price"])
+            writer = csv.writer(file, lineterminator="\n")
+            # Write all new updated rows to file
+            writer.writerow(expected_header)
+            writer.writerows(temp_data)
+            # Replace the old file with the updated one
+            print(f"Cart for {self.user.email} {'Updated' if user_exists else 'Saved'} to CSV.")
 
-            # Save all carts excluding the current one
-            writer.writerows(rows)
-
-            # Save the current cart
-            for item, quantity in self.cart_items.items():
-                writer.writerow([self.user.email, item.name, quantity, item.price])
-        print(f"Cart for {self.user.email} Saved to CSV.")
-
-    def load_cart_from_csv(self, filename="carts.csv"):
+    def load_cart_from_csv(self, filename: str = "cart_data.csv") -> None:
         """
         Load the last shopping cart for the user from the CSV file.
         """
+        print("Checking if file exists...")
         if not os.path.exists(filename):
-            print("No saved carts found.")
+            print("File does not exist.")
             return
 
+        print("File exists, loading data...")
         self.cart_items = {}
         with open(filename, mode="r", newline="") as file:
             reader = csv.reader(file)
-            next(reader, None)  # Skip the headlines row
+            for row in reader:
+                print("Reading row:", row)
+            headers = next(reader, None)  # Skip the headlines row
+
+            expected_header = ["user_email", "item_name", "quantity", "price"]
+            if headers != expected_header:
+                print(f"Incorrect CSV header detected while loading. Expected {expected_header}, but got {headers}.")
+                return
+
             for row in reader:
                 if row and row[0] == self.user.email:
                     item_name, quantity, price = row[1], int(row[2]), float(row[3])
+                    furniture_type = self.inventory.get_furniture_type(item_name)
 
-                    # Create a Furniture instance
-                    item = FurnitureFactory.create_furniture(furniture_type=item_name, name=item_name, price=price)
-                    self.cart_items[item] = quantity
-        print(f"Loaded previous cart for {self.user.email}.")
+                    if furniture_type:
+                        item = self.inventory.items_by_type[furniture_type].get(item_name)
+                        if item:
+                            self.cart_items[item] = quantity
+                        else:
+                            print(f"Warning: Item {item_name} not found in inventory.")
+                    else:
+                        print(f"Warning! Could not determine furniture type for '{item_name}'")
+        print(f"Loaded previous cart for {self.user.email}. Cart items: {self.cart_items}")
 
-    def clear_cart_from_csv(self, filename="carts.csv"):
+    def clear_cart_from_csv(self, filename: str = "carts.csv") -> None:
         """
         Remove the user's cart from the CSV after checkout.
         """

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from furniture import Furniture
+from typing import Optional
 
 
 class InventoryObserver(ABC):
@@ -45,6 +46,19 @@ class Inventory:
     def notify_observers(self, item, change_type):
         for observer in self.observers:
             observer.update(item, change_type)
+
+    def get_furniture_type(self, item_name: str) -> Optional[str]:
+        """
+        Get the furniture type based on the item name.
+        This function searches through the inventory and returns the type.
+        param item_name: The name of the furniture item.
+        return: The furniture type if found, otherwise None.
+        """
+
+        for furniture_type, items in self.items_by_type.items():
+            if item_name in items:
+                return furniture_type
+        return None
 
     def add_item(self, item: Furniture):
         """
@@ -165,3 +179,4 @@ class Inventory:
                 if item.available_quantity <= threshold:
                     low_stock_items.append(item)
         return low_stock_items
+

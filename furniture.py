@@ -64,8 +64,8 @@ class Furniture(ABC):
         self.wp = wp
         self.price = price
         self.dimensions = dimensions
-        self.available_quantity = available_quantity
         self.country = country
+        self.available_quantity = available_quantity
         self.type = "Generic"
         self.discount_strategy = discount_strategy
 
@@ -77,7 +77,7 @@ class Furniture(ABC):
         pass
 
     @abstractmethod
-    def apply_discount(self, discount: float) -> float:
+    def apply_discount(self, discount: DiscountStrategy) -> float:
         pass
 
     @staticmethod
