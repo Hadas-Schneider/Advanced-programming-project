@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+from typing import Dict, Optional, Tuple
+from typing import Union
+from flask import Flask, request, jsonify, Response
 from flask_httpauth import HTTPBasicAuth
 from User import User
 from shopping_cart import ShoppingCart
@@ -9,12 +11,12 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 # Initialize inventory and users
 inventory = Inventory()
-users = {}
-orders = {}
+users: Dict[str, User] = {}
+orders: Dict[str, ShoppingCart] = {}
 
 
 @auth.verify_password
-def verify_password(email, password):
+def verify_password(email: str, password: str) -> Optional[User]:
     user = users.get(email)
     if user and user.check_password(password):
         return user
@@ -22,9 +24,9 @@ def verify_password(email, password):
 
 
 @app.route("/")
-def home():
+def home() -> Response:
     return jsonify({
-        "message":"Welcome to the Online Furniture Store API!",
+        "message": "Welcome to the Online Furniture Store API!",
         "endpoints": [
             "/user/register",
             "/user/login",
@@ -38,10 +40,10 @@ def home():
 
 
 @app.route("/user/register", methods=["POST"])  # User Registration
-def register_user():
+def register_user() -> Union[Response, Tuple[Response, int]]:
     """Register a new user to the system"""
     data = request.json
-    email = data["email"]
+    email: str = data["email"]
     if email in users:
         return jsonify({'error': 'User already exists'}), 400
 
@@ -57,7 +59,7 @@ def register_user():
 
 
 @app.route("/user/login", methods=["POST"])  # User login
-def login_user():
+def login_user() -> Union[Response, Tuple[Response, int]]:
     """The user logs into the system with his details"""
     data = request.json
     email = data.get("email")
@@ -80,7 +82,7 @@ def login_user():
 
 
 @app.route("/furniture", methods=["GET"])  # Show all the furniture currently existent in inventory
-def get_furniture():
+def get_furniture() -> Response:
     furniture_list = inventory.get_all_items()
     return jsonify(furniture_list)
 
@@ -88,7 +90,7 @@ def get_furniture():
 # Add item to shopping cart
 @app.route("/cart/add", methods=["PUT"])
 @auth.login_required
-def add_to_cart():
+def add_to_cart() -> Union[Response, Tuple[Response, int]]:
     """Adding an item to the cart"""
     user = auth.current_user()
     data = request.json
@@ -115,7 +117,7 @@ def add_to_cart():
 
 @app.route("/cart/view", methods=["GET"])  # View the user's shopping cart
 @auth.login_required
-def view_cart():
+def view_cart() -> Response:
     user = auth.current_user()
     cart = orders.get(user.email)
     if not cart:
@@ -126,7 +128,7 @@ def view_cart():
 
 @app.route("/cart/remove", methods=["DELETE"])  # Remove item from cart
 @auth.login_required
-def remove_item_from_cart():
+def remove_item_from_cart() -> Union[Response, Tuple[Response, int]]:
     """Remove an item from the cart"""
     user = auth.current_user()
     data = request.json
@@ -155,7 +157,7 @@ def remove_item_from_cart():
 
 @app.route('/cart/checkout', methods=['POST'])  # Checkout an order
 @auth.login_required
-def checkout():
+def checkout() -> Union[Response, Tuple[Response, int]]:
     user = auth.current_user()
     if user.email not in orders:
         print("Checkout failed- Cart is empty")
@@ -181,6 +183,32 @@ def checkout():
         "payment_method": user.payment_method,
         "items": [{"name": item.name, "quantity": quantity} for item, quantity in order.items.items()]
     }), 200
+
+
+@app.route("/cart/save", methods=["POST"])
+@auth.login_required
+def save_cart_to_csv() -> Union[Response, Tuple[Response, int]]:
+    """Saving user's cart to CSV"""
+    user = auth.current_user()
+    if user.email not in orders:
+        return jsonify({"error": "No cart found for user"}), 404
+
+    cart = orders[user.email]
+    cart.save_cart_to_csv("carts.csv")
+    return jsonify({"message": "Cart Saved Successfully!"}), 200
+
+
+@app.route("/cart/load", methods=["GET"])
+@auth.login_required
+def load_car_from_csv() -> Union[Response, Tuple[Response, int]]:
+    """Loading the user's cart from CSV"""
+    user = auth.current_user()
+    if user.email not in orders:
+        orders[user.email] = ShoppingCart(user, inventory)
+
+    cart = orders[user.email]
+    cart.load_cart_from_csv()
+    return jsonify({"cart": cart.view_cart()}), 200
 
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
+import os
+
 import pytest
 import base64
 from app import app, users, inventory
 from User import User
-from inventory import Inventory
 from furniture import Chair
 import json
 
@@ -154,3 +155,31 @@ def test_remove_item_not_in_cart(client, create_test_user):
     print("Response JSON:", response.json)
     assert response.status_code == 404, f"Unexpected response: {response.status_code}, {response.data}"
 
+
+def test_save_cart_to_csv_via_api(client, create_test_user):
+    """ Testing that the cart saves to the CSV through our Flask API"""
+    headers = get_auth_headers("test@example.com", "Test@123")
+    # Adding item to cart
+    client.put("/cart/add", json={
+        "name": "Office Chair",
+        "type": "Chair",
+        "quantity": 2
+    }, headers=headers)
+
+    # Sending the CSV through the API
+    response = client.post("/cart/save", headers=headers)
+    assert response.status_code == 200
+    assert response.json["message"] == "Cart Saved Successfully!"
+
+    # Check that file exists
+    assert os.path.exists("carts.csv"), "Cart CSV file not created!"
+
+
+def test_load_cart_from_csv_via_api(client, create_test_user):
+    """ Testing that the cart loads from the CSV through our Flask API"""
+    headers = get_auth_headers("test@example.com", "Test@123")
+
+    # Loading the cart from CSV
+    response = client.get("/cart/load", headers=headers)
+    assert response.status_code == 200
+    assert "cart" in response.json
