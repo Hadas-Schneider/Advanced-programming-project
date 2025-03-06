@@ -31,6 +31,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python -m pip install -r requirements.txt
         python -m pip install flask-httpauth
+        pip list
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
