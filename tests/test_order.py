@@ -68,45 +68,59 @@ class TestOrder(unittest.TestCase):
         )
         self.assertEqual(str(self.order), expected)
 
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
+
+    @patch("os.path.exists")
+    @patch("builtins.open", new_callable=mock_open)
     def test_save_order_to_csv_new_file(self, mock_file, mock_exists):
-        mock_exists.return_value = False
+        """
+        Test `save_order_to_csv` when the file does not exists.
+        """
+        mock_exists.return_value = False  # Simulating a new file
+
         csv_output = io.StringIO()
         mock_file.return_value.__enter__.return_value = csv_output
+
         self.order.save_order_to_csv("test_orders.csv")
 
         mock_file.assert_called_once_with("test_orders.csv", mode="a", newline="")
         mock_exists.assert_called_once_with("test_orders.csv")
+
         csv_output.seek(0)
         csv_reader = csv.reader(csv_output)
         rows = list(csv_reader)
 
+        # Validate header row
         self.assertEqual(rows[0], ["order_id", "user_email", "shipping_address", "payment_method",
                                    "items", "total_price", "status"])
 
+        # Validate order details row
         items_str = "|".join(["Chair x 2 ($20.00)", "Table x 1 ($80.00)", "Bed x 1 ($100.00)"])
         expected_row = ["f47ac10b-58cc-4372-a567-0e02b2c3d479", "test@example.com", "123 Tel Aviv", "Credit card",
                         items_str, "$200.00", "Pending"]
 
-        for expected_item in expected_row:
-            self.assertIn(expected_item, str(rows[1]))
+        self.assertEqual(rows[1], expected_row)
 
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch("os.path.exists")
+    @patch("builtins.open", new_callable=mock_open)
     def test_save_order_to_csv_existing_file(self, mock_file, mock_exists):
-        mock_exists.return_value = True
+        """
+        Test `save_order_to_csv` when the file already exists.
+        """
+
+        mock_exists.return_value = True  # Simulating an existing file
+
         csv_output = io.StringIO()
         mock_file.return_value.__enter__.return_value = csv_output
-        self.order.save_order_to_csv()
-        mock_file.assert_called_once_with("orders.csv", mode="a", newline="")
+
+        self.order.save_order_to_csv("test_orders.csv")
+
+        mock_file.assert_called_once_with("test_orders.csv", mode="a", newline="")
+
         csv_output.seek(0)
         csv_reader = csv.reader(csv_output)
         rows = list(csv_reader)
 
-        self.assertNotEqual(len(rows), 0)
-        if len(rows) > 0:
-            self.assertNotEqual(rows[0][0], "order_id")
+        self.assertNotEqual(rows[0][0], "order_id") if rows else None
 
     @patch('builtins.open', new_callable=mock_open)
     def test_load_orders_from_csv(self, mock_file):

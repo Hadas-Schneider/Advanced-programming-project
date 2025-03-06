@@ -69,8 +69,6 @@ class Order:
                 f"${self.total_price:.2f}", self.status
             ])
 
-        print("Order saved successfully to CSV.")
-
     @staticmethod
     def load_orders_from_csv(filename="orders.csv"):
         """
