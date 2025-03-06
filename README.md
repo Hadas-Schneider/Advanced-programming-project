@@ -29,7 +29,7 @@ This project aims to:
 ## 🛠️ Features Implemented
 
 ### 1. Furniture Management
-Base Classes: 
+Base Classes: <br>
 1.*DiscountStrategy* (Inherits from ABC) <br> 
 This class defines different discount strategies that will be implemented later.
 It has one abstract method - get_discount() and 4 derived classes(when every derived class implements get_discount accordingly).
