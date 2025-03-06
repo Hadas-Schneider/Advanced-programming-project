@@ -24,7 +24,7 @@ def verify_password(email, password):
 @app.route("/")
 def home():
     return jsonify({
-        "message":"Welcome to the Online Furniture Store API!",
+        "message": "Welcome to the Online Furniture Store API!",
         "endpoints": [
             "/user/register",
             "/user/login",

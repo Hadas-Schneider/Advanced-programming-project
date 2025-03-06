@@ -1,6 +1,7 @@
 import unittest
 from shopping_cart import ShoppingCart
-from furniture import Chair, Table, VIPDiscount
+from furniture import Table
+from furniture import Chair
 from User import User
 from inventory import Inventory
 import os

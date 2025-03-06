@@ -179,4 +179,3 @@ class Inventory:
                 if item.available_quantity <= threshold:
                     low_stock_items.append(item)
         return low_stock_items
-

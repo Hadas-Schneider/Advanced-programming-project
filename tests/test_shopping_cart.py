@@ -199,7 +199,7 @@ class TestShoppingCart(unittest.TestCase):
         m = mock_open(read_data=mock_data)
         mock_file.side_effect = m
 
-        with patch('builtins.open', m) as mocked_file:
+        with patch('builtins.open', m):
             handle = mock_csv_writer.return_value
             handle.writerows = MagicMock()
 
@@ -231,7 +231,7 @@ class TestShoppingCart(unittest.TestCase):
         m = mock_open(read_data=initial_data)
         mock_file.side_effect = m
 
-        with patch('builtins.open', m) as mocked_file:
+        with patch('builtins.open', m):
             handle = mock_csv_writer.return_value
             handle.writerow.side_effect = lambda x: None
 

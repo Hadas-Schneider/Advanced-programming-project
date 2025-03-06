@@ -207,4 +207,3 @@ def test_load_cart_from_csv_via_api(mock_exists, mock_file, client, create_test_
     assert response.status_code == 200
     assert "cart" in response.json
     mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")
-

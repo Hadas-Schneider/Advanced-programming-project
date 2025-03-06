@@ -329,4 +329,3 @@ class ShoppingCart:
                 print(f" Cart for {self.user.email} cleared after checkout.")
         else:
             os.remove(filename)
-

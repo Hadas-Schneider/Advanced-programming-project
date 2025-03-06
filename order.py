@@ -64,14 +64,11 @@ class Order:
                 writer.writerow(["order_id", "user_email", "shipping_address", "payment_method",
                                  "items", "total_price", "status"])
 
-
             items_str = "|".join([f"{name} x {quantity} (${price:.2f})"
                                   for name, quantity, price in self.items])
 
             writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
                             f"${self.total_price:.2f}", self.status])
-
-        print(f"Order saved successfully to {filename}.")
 
     @staticmethod
     def load_orders_from_csv(filename="orders.csv"):
