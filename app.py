@@ -6,25 +6,26 @@ from inventory import Inventory
 
 
 app = Flask(__name__)
-auth = HTTPBasicAuth()
-# Initialize inventory and users
+auth = HTTPBasicAuth()  # Will be used as the basic authentication decorator "@auth" for actions that require login
+
+# Initialize inventory,users and orders
 inventory = Inventory()
 users = {}
 orders = {}
 
 
 @auth.verify_password
-def verify_password(email, password):
-    user = users.get(email)
-    if user and user.check_password(password):
+def verify_password(email, password):  # The function that is defined as the mechanism for verification
+    user = users.get(email)  # Get the user object that has the given email address in the Users' database
+    if user and user.check_password(password):  # If there is such user and his password fits the criteria
         return user
     return None
 
 
-@app.route("/")
+@app.route("/")  # The default here is using the GET method
 def home():
-    return jsonify({
-        "message":"Welcome to the Online Furniture Store API!",
+    return jsonify({  # Show the main endpoints of the application and how the home page should look like
+        "message": "Welcome to the Online Furniture Store API!",
         "endpoints": [
             "/user/register",
             "/user/login",
@@ -41,7 +42,7 @@ def home():
 def register_user():
     """Register a new user to the system"""
     data = request.json
-    email = data["email"]
+    email = data["email"]  # Because we defined users to be recognized by their email address
     if email in users:
         return jsonify({'error': 'User already exists'}), 400
 
@@ -52,7 +53,7 @@ def register_user():
         address=data["address"],
         payment_method=data.get("payment_method", "Credit Card")
     )
-    users[email] = new_user
+    users[email] = new_user  # Save the new user that was registered
     return jsonify({'message': 'User registered successfully'}), 201
 
 
@@ -63,10 +64,10 @@ def login_user():
     email = data.get("email")
     user = users.get(email)
     password = data.get("password")
-    if not user:
+    if not user:  # If the user's not saved in the user's database return that he was not found
         return jsonify({"error": "User email not found."}), 404
 
-    if not user.check_password(password):
+    if not user.check_password(password):  # If the user's password doesn't meet the criteria
         return jsonify({"message": "Invalid password"}), 401
 
     return jsonify({
@@ -80,14 +81,14 @@ def login_user():
 
 
 @app.route("/furniture", methods=["GET"])  # Show all the furniture currently existent in inventory
-def get_furniture():
+def get_furniture():  # To observe all the inventory that exists in the store
     furniture_list = inventory.get_all_items()
     return jsonify(furniture_list)
 
 
 # Add item to shopping cart
 @app.route("/cart/add", methods=["PUT"])
-@auth.login_required
+@auth.login_required  # We restricted this action to be available only to users that are logged in
 def add_to_cart():
     """Adding an item to the cart"""
     user = auth.current_user()
@@ -97,10 +98,10 @@ def add_to_cart():
     furniture_type = data.get("type")
     quantity = int(data.get("quantity", 1))
 
-    if user.email not in orders:
+    if user.email not in orders:  # Create a new cart for user if he doesn't have one in the Orders' database
         orders[user.email] = ShoppingCart(user, inventory)
 
-    cart = orders[user.email]
+    cart = orders[user.email]  # Extract the user's cart from the Orders' database
 
     item = inventory.items_by_type.get(furniture_type, {}).get(item_name)
     if not item:
@@ -114,7 +115,7 @@ def add_to_cart():
 
 
 @app.route("/cart/view", methods=["GET"])  # View the user's shopping cart
-@auth.login_required
+@auth.login_required  # We restricted this action to be available only to users that are logged in
 def view_cart():
     user = auth.current_user()
     cart = orders.get(user.email)
@@ -126,12 +127,12 @@ def view_cart():
 
 @app.route("/cart/remove", methods=["DELETE"])  # Remove item from cart
 @auth.login_required
-def remove_item_from_cart():
+def remove_item_from_cart():  # We restricted this action to be available only to users that are logged in
     """Remove an item from the cart"""
     user = auth.current_user()
     data = request.json
 
-    if "item_name" not in data or not data["item_name"]:
+    if "item_name" not in data or not data["item_name"]:  # If there's no item_name in the data or in cart
         return jsonify({"error": "Item name is missing in request."}), 400
 
     item_name = data["item_name"]
@@ -141,24 +142,20 @@ def remove_item_from_cart():
 
     # Prepare the cart
     cart = orders[user.email]
-    print(f" Cart before removal: {cart.cart_items}")
-
+    # Get all items of the cart
     item = next((i for i in cart.cart_items.keys() if i.name == item_name), None)
     if not item:
-        print(f"Item '{item_name}' not found in cart!")
         return jsonify({"error": f"Item '{item_name}' is not in the cart."}), 404
 
-    cart.remove_item(item)
-    print(f"Item '{item_name}' removed successfully.")
+    cart.remove_item(item)  # Call for the remove_item method from Shopping_cart.py
     return jsonify({"message": f"Removed {item_name} from cart."}), 200
 
 
 @app.route('/cart/checkout', methods=['POST'])  # Checkout an order
-@auth.login_required
+@auth.login_required  # We restricted this action to be available only to users that are logged in
 def checkout():
     user = auth.current_user()
     if user.email not in orders:
-        print("Checkout failed- Cart is empty")
         return jsonify({"error": "Cart is empty"}), 400
 
     cart = orders[user.email]
@@ -170,7 +167,6 @@ def checkout():
     order = cart.checkout()  # Using The Checkout method from Shopping_cart.py
 
     if not order:
-        print("Checkout failed - Possible stock issue or payment failure.")
         return jsonify({"error": "Checkout failed. Please check stock availability or payment method."}), 400
 
     return jsonify({
@@ -185,7 +181,7 @@ def checkout():
 
 @app.route('/cart/save', methods=['POST'])
 @auth.login_required()
-def save_cart_to_csv():
+def save_cart_to_csv():  # We restricted this action to be available only to users that are logged in
     """Save the shopping cart to CSV"""
     user = auth.current_user()
     if user.email not in orders:
@@ -197,11 +193,11 @@ def save_cart_to_csv():
 
 @app.route('/cart/load', methods=['GET'])
 @auth.login_required
-def load_cart_from_csv():
+def load_cart_from_csv():  # We restricted this action to be available only to users that are logged in
     """Load the user's shopping cart from CSV"""
     user = auth.current_user()
 
-    if user.email not in orders:
+    if user.email not in orders:  # If there's no existent cart, create a new one
         orders[user.email] = ShoppingCart(user, inventory)
 
     cart = orders[user.email]

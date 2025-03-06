@@ -9,7 +9,7 @@ import os
 import order
 
 
-def mock_inventory():
+def mock_inventory():  # Instead of creating actual database of inventory, create a mock.
     inventory = Inventory()
     inventory.add_item(Furniture("FG4rKJp", "Chair", "Office Chair", "Plastic", "Black", 3, 100.8, (250, 112, 88),
                                  "Germany", 2))
@@ -20,6 +20,7 @@ def mock_inventory():
 @patch("csv.writer")
 def test_save_order_does_not_write_orders_csv(mock_csv_writer, mock_file):
     """ Test to make sure we don't write into orders.csv """
+    # Instead of creating actual database of orders, create a mock.
     mock_user = MagicMock()
     mock_user.email = "john@example.com"
     mock_user.address = "123 Test St"
@@ -64,7 +65,7 @@ class TestShoppingCart(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.cart.add_item(self.chair, quantity=-2)  # Negative quantity
         with self.assertRaises(ValueError):
-            self.cart.add_item(self.chair, quantity="five")  # String instead of int
+            self.cart.add_item(self.chair, quantity="five")  # String instead of int (wrong kind of input)
 
     def test_add_nonexistent_item(self):
         """ Test adding a non-existent item. """
@@ -136,7 +137,7 @@ class TestShoppingCart(unittest.TestCase):
         table_price_after_discount = self.table.apply_discount(self.table.discount_strategy)
 
         subtotal = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
-        expected_total = subtotal * 1.18
+        expected_total = subtotal * 1.18  # How the sum should be with taxes applied
         self.assertEqual(self.cart.calculate_total(tax_percentage=18), expected_total)
 
     def test_calculate_total_with_discount(self):
@@ -146,14 +147,14 @@ class TestShoppingCart(unittest.TestCase):
         self.cart.add_item(self.chair, quantity=1)
         self.cart.add_item(self.table, quantity=2)
 
-        self.cart.discount_strategy = VIPDiscount()
+        self.cart.discount_strategy = VIPDiscount()  # Choosing a random discount strategy
 
         chair_price_after_discount = self.chair.apply_discount(self.chair.discount_strategy)
         table_price_after_discount = self.table.apply_discount(self.table.discount_strategy)
 
         subtotal = (chair_price_after_discount * 1) + (table_price_after_discount * 2)
         total_after_cart_discount = subtotal * (1 - VIPDiscount().get_discount() / 100)
-        expected_total = total_after_cart_discount * 1.18
+        expected_total = total_after_cart_discount * 1.18  # How the sum should be with taxes applied
         self.assertEqual(self.cart.calculate_total(tax_percentage=18), expected_total)
 
     def test_checkout_success(self):
@@ -162,9 +163,10 @@ class TestShoppingCart(unittest.TestCase):
         """
         self.cart.add_item(self.chair, quantity=2)
         self.cart.add_item(self.table, quantity=1)
+        # Use patch to mock payment process and saving the order to database through checkout process
         with patch('shopping_cart.ShoppingCart.process_payment', return_value=True):
-            order = self.cart.checkout()
-            order.save_order_to_csv(filename="test_orders.csv")
+            order1 = self.cart.checkout()
+            order1.save_order_to_csv(filename="test_orders.csv")
 
     def test_calculate_total(self):
         """Test calculating the total cost of items in the cart."""
@@ -181,6 +183,7 @@ class TestShoppingCart(unittest.TestCase):
         expected_final_total = expected_total_after_discount * (1 + (18 / 100))
         calculated_total = self.cart.calculate_total(tax_percentage=18)
 
+        # Consider the in-accurate calculation using percentages on floats
         self.assertAlmostEqual(calculated_total, round(expected_final_total, 2), places=2,
                                msg="Calculated total does not match expected total.")
 
@@ -191,40 +194,39 @@ class TestShoppingCart(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.cart.add_item(self.chair, quantity=15)
 
-    @patch("shopping_cart.open", new_callable=mock_open)
-    @patch("csv.writer", autospec=True)
+    @patch("shopping_cart.open", new_callable=mock_open)  # Replaces the "open" with mock
+    @patch("csv.writer", autospec=True)  # Replaces the "csv.writer" with mock to follow calls(for debugging the tests)
     def test_save_cart_to_csv(self, mock_csv_writer, mock_file):
         """Test that the shopping cart is saved in the CSV."""
-        mock_data = "user_email,item_name,quantity,price\n"
-        m = mock_open(read_data=mock_data)
-        mock_file.side_effect = m
+        mock_data = "user_email,item_name,quantity,price\n"  # Creating mocked testing data for the CSV database
+        m = mock_open(read_data=mock_data)  # Mock for reading the file
+        mock_file.side_effect = m  # Replaces the "open" with mock
 
         with patch('builtins.open', m) as mocked_file:
-            handle = mock_csv_writer.return_value
-            handle.writerows = MagicMock()
+            handle = mock_csv_writer.return_value  # Creating mock of the "CSV writer"
+            handle.writerows = MagicMock()  # To follow the calls to "writerows"
 
+            # To mock the process of adding an item and saving the change to the database
             self.cart.add_item(self.chair, 1)
             self.cart.save_cart_to_csv("test_carts.csv")
 
+            # Check that the file opens with the right parameters
             mock_file.assert_called_once_with("test_carts.csv", mode='w', newline='')
-            print("Actual calls to writerows:", handle.writerows.call_args_list)
 
+            # Creating the predicted data of the file
             expected_data = [
                 ["user_email", "item_name", "quantity", "price"],
                 ["john@example.com", "Office Chair", 1, 100.0]
             ]
+            # Extract the data that were actually written to CSV
             actual_calls = handle.writerows.call_args_list[0][0][0]
 
-            print(f"Expected: {expected_data}")
-            print(f"Got: {actual_calls}")
-
             assert expected_data == actual_calls, f"Mismatch! Expected {expected_data}, Got {actual_calls}"
-            # handle.writerow.assert_has_calls(expected_calls, any_order=False)
 
             print("Test Passed: CSV file saved correctly!")
 
-    @patch("shopping_cart.open", new_callable=mock_open)
-    @patch("csv.writer", autospec=True)
+    @patch("shopping_cart.open", new_callable=mock_open)  # Replaces the "open" with mock
+    @patch("csv.writer", autospec=True)  # Replaces the "csv.writer" with mock to follow calls(for debugging the tests)
     def test_update_existing_cart_in_csv(self, mock_csv_writer, mock_file):
         """Testing the existent user's cart updates in the file """
         initial_data = "user_email,item_name,quantity,price\njohn@example.com,Office Chair,2,200\n"
@@ -233,7 +235,7 @@ class TestShoppingCart(unittest.TestCase):
 
         with patch('builtins.open', m) as mocked_file:
             handle = mock_csv_writer.return_value
-            handle.writerow.side_effect = lambda x: None
+            handle.writerow.side_effect = lambda x: None  # Replace the writing to file with empty function
 
             # First save to simulate the initial write
             self.cart.add_item(self.chair, quantity=2)
@@ -243,11 +245,8 @@ class TestShoppingCart(unittest.TestCase):
                 ['john@example.com', 'Office Chair', 2, 100.0]
             ]
 
-            # Check the data sent to writerows before asserting
-            print("Data sent to writerows after first save:", handle.writerows.call_args_list)
+            # Extract the data that were actually written
             actual_calls = [c.args[0] for c in handle.writerows.call_args_list]
-            print(f"Expected: {expected_data_first_save}")
-            print(f"Got: {actual_calls}")
 
             assert any(expected_data_first_save[0] in call for call in actual_calls), \
                 f"Mismatch! Expected part of {expected_data_first_save} in {actual_calls}"
@@ -255,10 +254,12 @@ class TestShoppingCart(unittest.TestCase):
     def test_load_cart_from_csv(self):
         """ Testing the reloading of the data in the CSV file."""
         mock_data = "user_email,item_name,quantity,price\njohn@example.com,Office Chair,1,100\n"
-        # Creating the mock to open the CSV file
+
+        # Creating an object that visualizes a file to mock the open the CSV file
         file_like_object = StringIO(mock_data)
-        with patch('builtins.open', return_value=file_like_object), patch('os.path.exists', return_value=True):
-            self.cart.load_cart_from_csv("test_carts.csv")
+        with patch('builtins.open', return_value=file_like_object),\
+                patch('os.path.exists', return_value=True):  # Guarantees the file will look like it exists
+            self.cart.load_cart_from_csv("test_carts.csv")  # Mock the reloading of the data from the CSV
 
     def tearDown(self):
         """

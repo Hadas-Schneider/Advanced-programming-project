@@ -55,7 +55,7 @@ class Order:
         """
         if filename is None:
             filename = "test_orders.csv" if "pytest" in sys.modules else "orders.csv"
-        print(f"📄 Saving order to {filename}")
+        print(f"Saving order to {filename}")
 
         file_exists = os.path.exists(filename)
         with open(filename, mode="a", newline="") as file:
