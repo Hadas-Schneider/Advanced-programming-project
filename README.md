@@ -8,10 +8,10 @@ Welcome to our Online Furniture Store, a Python-based application that simulates
 ## 📜 Project Overview <br>
 This project aims to:
 
-Simulate an e-commerce application for managing and selling furniture.
-Demonstrate the use of Python's OOP features, design patterns, and clean coding principles.
-Optimize data structures for efficient inventory and user management.
-The application is divided into the following components:
+* Simulate an e-commerce application for managing and selling furniture.
+* Demonstrate the use of Python's OOP features, design patterns, and clean coding principles.
+* Optimize data structures for efficient inventory and user management.
+<br> The application is divided into the following components:
 <br>
 - Furniture Management <br>
 - Inventory System <br>
@@ -29,20 +29,30 @@ The application is divided into the following components:
 ## 🛠️ Features Implemented
 
 ### 1. Furniture Management
-Base Class: Furniture
-
-Attributes: u_id, name, description, material, color, wp, price, dimensions, country, available_quantity.<br>
-Abstract method: calculate_discount (overridden in derived classes).<br>
+Base Classes: 
+1.*DiscountStrategy* (Inherits from ABC) <br> 
+This class defines different discount strategies that will be implemented later.
+It has one abstract method - get_discount() and 4 derived classes(when every derived class implements get_discount accordingly).
+To design this class, we used the Strategy Pattern.<br>
+2. *Furniture* (Inherits from ABC) <br>
+This class defines how a furniture instance looks like and relevant methods.
+Attributes: u_id, name, description, material, color, wp, price(in $), dimensions, available_quantity, country of manufacture, type(default is "Generic"), discount_strategy(default is "NoDiscount") .<br>
+Abstract methods:<br>
+- calculate_discount()- (overridden in derived classes).<br>
+- apply_discount()- (overridden in derived classes).<br>
+Static method: price_with_discount() that returns the price after implementing the discount.<br>
+Other class methods: <br>
+1. apply_tax()- returns the price with the tax percentage.<br>
+2. is_available() - checks if the furniture item is currently in stock.
 
 - **Derived Classes:** <br>
         Chair, Table, Sofa, Bed, Wardrobe. <br>
-        Each class has unique attributes and a custom implementation of calculate_discount.
-        Example: Chairs with armrests receive an additional discount.<br>
+        To enforce type-specific discount calculations- each class has unique attributes and a custom implementation of the 2 @abstractmethods - calculate_discount() and apply_discount(). In addition, every type of furniture has a unique implementation of string presentation for its' specific details.
+        Example: Chairs with armrests receive an additional discount and have a method called chair_info() that returns its chair-specific details.<br>
 
 - **Data Structure Choice:** <br>
-        Used inheritance to ensure reusability and modularity, allowing for easy extension of new furniture types.
-        Implemented @abstractmethod to enforce type-specific discount calculations.
-
+        We used inheritance to ensure reusability and modularity, allowing for easy extension of new furniture types- We chose the Factory Pattern to support that -for this, we defined a class called FurnitureFactory to handle different inputs of furniture types.<br>
+        
 ---------
 
 ### 2. Inventory System
