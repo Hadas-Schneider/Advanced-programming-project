@@ -43,7 +43,9 @@ class User:
             raise ValueError("Password must be at least 8 characters long and contain at least 1 special character")
         self.name = name
         self.email = email
-        self.password, self.salt = self.hash_password(password)  # Store hashed password and salt
+        self.password = password
+        self.salt = os.urandom(8).hex()  # Generate a random salt
+        self.hashed_password = self.hash_password(password)  # Store hashed password and salt
         self.address = address
         self.payment_method = payment_method if payment_method else "Credit Card"  # Added default payment method
         self.order_history = []  # List of past orders
@@ -64,8 +66,8 @@ class User:
     def validate_password(password: str) -> bool:
         """
         Validate that the user's password meets security requirements.
-        :param password: the password the user chose.
-        :return: boolean value if the password meets criteria.
+        param password: The password the user chose.
+        return: Boolean value if the password meets criteria.
         """
         if len(password) < 8:
             return False
@@ -73,29 +75,25 @@ class User:
             return False
         return True
 
-    @staticmethod
-    def hash_password(password: str) -> (str, str):
+    def hash_password(self, password: str) -> str:
         """
         Hash a plaintext password using SHA-256 with a unique salt.
 
         param password: Plaintext password to hash.
-        return: A tuple of (hashed_password, salt).
+        return: An hashed password.
         """
-        salt = os.urandom(16).hex()  # Generate a random salt
-        salted_password = password + salt
-        hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()
-        return hashed_password, salt
+        salted_password = password + self.salt
+        hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()[:16]
+        return hashed_password
 
     def check_password(self, password: str) -> bool:
         """
-        Verify if a plaintext password matches the stored hashed password.
+        Rehash the input password with the stored salt and compare.
 
         param password: Plaintext password to verify.
         return: True if the password matches, False otherwise.
         """
-        salted_password = password + self.salt
-        hashed_password = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()
-        return hashed_password == self.password
+        return self.hashed_password == self.hash_password(password)
 
     def update_profile(self, name: str = None, address: str = None):
         """
@@ -113,8 +111,8 @@ class User:
     def update_payment_method(self, payment_method: str):
         """
         Update the user's preferred payment method.
-        param payment_method: a default value
-        return: selected payment method by the user.
+        param payment_method: A default value
+        return: Selected payment method by the user.
         """
         self.payment_method = payment_method
         print(f"Payment method updated to: {payment_method}")
@@ -142,7 +140,7 @@ class User:
         Add an item to the user's wishlist.
         """
         self.wishlist.append(item)
-        print(f"{item.name} added to wishlist.")
+        print(f"{item} added to wishlist.")
 
     def remove_from_wishlist(self, item):
         """
@@ -150,47 +148,93 @@ class User:
         """
         if item in self.wishlist:
             self.wishlist.remove(item)
-            print(f" {item.name} removed from wishlist.")
+            print(f" {item} removed from wishlist.")
         else:
-            print(f"{item.name} is not in the wishlist.")
+            print(f"{item} is not in the wishlist.")
 
     def view_wishlist(self):
         """
         Display the user's wishlist. If it's empty, return a message.
         """
-        return [item.name for item in self.wishlist] if self.wishlist else ["Wishlist is empty."]
+        return [item for item in self.wishlist] if self.wishlist else ["Wishlist is empty."]
 
-    def save_to_csv(self, filename="users.csv"):
-        """
-        Save user details to a CSV file.
-        """
+    def save_to_csv(self, filename):
+        # Read the existing data from the file
+        updated = False
+        rows = []
+
+        try:
+            with open(filename, mode="r", newline="") as file:
+                reader = csv.reader(file)
+                rows = list(reader)
+        except FileNotFoundError:
+            # If the file doesn't exist, it will be created when writing
+            rows.append(
+                ["name", "email", "password", "salt", "hashed_password", "address", "payment_method", "order_history",
+                 "wishlist"])
+
+        # Check if the user already exists in the CSV based on password and salt
+        for i, row in enumerate(rows[1:], start=1):  # Skipping header
+            if row[1] == self.email:  # Match by email instead of password and salt
+                # User exists, update the row with new details
+                rows[i] = [self.name, self.email, self.password, self.salt, self.hashed_password,
+                           self.address, self.payment_method,
+                           "|".join(self.format_order_history()) if self.order_history else None,
+                           "|".join(self.wishlist) if self.wishlist else None]
+                updated = True
+                break
+
+        # If the user was not found, add a new row
+        if not updated:
+            rows.append([self.name, self.email, self.password, self.salt, self.hashed_password,
+                         self.address, self.payment_method,
+                         "|".join(self.format_order_history()) if self.order_history else None,
+                         "|".join(self.wishlist) if self.wishlist else None])
+
+        # Write the updated rows to the CSV
         with open(filename, mode="w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["name", "email", "password", "salt", "address", "payment_method", "order_history",
-                            "wishlist"])
-            writer.writerow([
-                self.name, self.email, self.password, self.salt, self.address, self.payment_method,
-                "|".join(self.order_history) if self.order_history else "No orders",
-                "|".join(self.wishlist) if self.wishlist else "Wishlist is empty"
-            ])
-        print("User data saved successfully to CSV.")
+            writer.writerows(rows)
+
+    def format_order_history(self):
+        """Formats the order history into a string representation."""
+        formatted_orders = []
+        for order in self.order_history:
+            # Ensure the order.items is formatted as "item_name x quantity"
+            if isinstance(order.items, dict):
+                formatted_items = ", ".join([f"{item} x {quantity}" for item, quantity in order.items.items()])
+                formatted_orders.append(formatted_items)
+        return formatted_orders
 
     @staticmethod
-    def load_from_csv(filename="users.csv"):
+    def load_from_csv(filename, name, email, address):
         """
-        Load user details from a CSV file.
+        Load user from CSV file based on name, email, and address
         """
         try:
-            with open(filename, mode="r") as file:
-                reader = csv.DictReader(file)
+            with open(filename, mode="r", newline="") as file:
+                reader = csv.reader(file)
+
                 for row in reader:
-                    user = User(row["name"], row["email"], row["password"], row["address"],
-                                row.get("payment_method", "Credit Card")
-                                )
-                    user.order_history = row["order_history"].split("|") if row["order_history"] != "No orders" else []
-                    user.wishlist = row["wishlist"].split("|") if row["wishlist"] != "Wishlist is empty" else []
-                    print(" User data loaded successfully from CSV.")
-                    return user
-        except FileNotFoundError:
-            print(" User CSV file not found.")
-        return None
+                    (csv_name, csv_email, password, salt, csv_hashed_password,
+                     csv_address, payment_method, order_history, wishlist) = row
+
+                    # Match user by name, email, and address
+                    if csv_name == name and csv_email == email and csv_address == address:
+                        # Reconstruct the user object from the row data
+                        user = User(
+                            name=csv_name,
+                            email=csv_email,
+                            password=password,
+                            address=csv_address,
+                            payment_method=payment_method
+                        )
+                        user.salt = salt  # Salt is stored as a string
+                        user.hashed_password = csv_hashed_password  # Ensure we set the hashed password correctly
+                        user.order_history = order_history.split("|") if order_history else []
+                        user.wishlist = wishlist.split("|") if wishlist else []
+                        return user  # Return the matched user
+
+        except ValueError:
+            print("User not found.")
+        return None  # Return None if no match is found
