@@ -136,7 +136,7 @@ class Inventory:
         """
         all_items = []
         for furniture_type, items in self.items_by_type.items():
-            for item in items.items():
+            for name, item in items.items():
                 all_items.append({
                     'id': item.u_id,
                     'name': item.name,

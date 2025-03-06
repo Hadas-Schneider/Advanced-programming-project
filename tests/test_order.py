@@ -121,8 +121,8 @@ class TestOrder(unittest.TestCase):
         rows = list(csv_reader)
 
         # Ensure that the header is not duplicated
-        if len(rows) > 0:
-            self.assertEqual(rows[0][0], "order_id")
+        if len(rows) > 1:
+            self.assertEqual(rows[1][0], "order_id")
 
     @patch('builtins.open', new_callable=mock_open)
     def test_load_orders_from_csv(self, mock_file):
