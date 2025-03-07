@@ -164,13 +164,13 @@ Attributes: order_id, user, items (the dictionary of ordered items), total_price
 #### Object-Oriented Design:
 
 The project follows OOP principles to ensure modularity, maintainability, and scalability.<br>
-Encapsulation: Attributes like user credentials and order details are kept private, with controlled access via methods.<br>
-Inheritance: Used in the Furniture hierarchy, allowing different furniture types to have specialized attributes and behavior.<br>
-Strategy Pattern: Implemented for DiscountStrategy, allowing dynamic selection of discount rules per furniture type.<br>
-Factory Pattern: The FurnitureFactory class enables easy creation of different furniture objects while maintaining abstraction.<br>
-Observer Pattern: Implemented for order status updates—users are notified when their order status changes.<br>
-The Order class acts as a subject, while customers and admin panels serve as observers.
-Ensures automatic updates without manual polling, improving efficiency.
+* **Encapsulation:** Attributes like user credentials and order details are kept private, with controlled access via methods.<br>
+* **Inheritance:** Used in the Furniture hierarchy, allowing different furniture types to have specialized attributes and behavior.<br>
+* **Strategy Pattern:** Implemented for DiscountStrategy, allowing dynamic selection of discount rules per furniture type.<br>
+* **Factory Pattern:** The FurnitureFactory class enables easy creation of different furniture objects while maintaining abstraction.<br>
+* **Observer Pattern:** Implemented for order status updates—users are notified when their order status changes.<br>
+                        The Order class acts as a subject, while customers and admin panels serve as observers.
+                        Ensures automatic updates without manual polling, improving efficiency.
 
 #### Data Structures:<br>
 
@@ -187,19 +187,19 @@ Used lazy evaluations (e.g., filtering only when needed).<br>
 
 #### Security:
 
-Password Hashing:<br>
+* **Password Hashing:** <br>
 User passwords are hashed using a secure hashing algorithm before storage.<br>
 
-Encapsulation of Sensitive Data:<br>
+* **Encapsulation of Sensitive Data:** <br>
 User credentials and payment details are stored securely, with restricted access.<br>
 
-Data Validation:<br>
+* **Data Validation:** <br>
 Inputs (e.g., user registration, order details) are validated to prevent injection attacks.<br>
 
-Inventory Protection:<br>
+* **Inventory Protection:** <br>
 Checkout process includes stock validation to prevent overselling unavailable items.<br>
 
-Unique Order IDs:<br>
+* **Unique Order IDs:** <br>
 Prevents duplicat. <br>
 
 
