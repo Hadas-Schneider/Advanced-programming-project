@@ -152,7 +152,21 @@ Attributes: order_id, user, items (the dictionary of ordered items), total_price
 
 ### 6. API 
 
-        TODO        ????? 
+The app.py file serves as the entry point for the Flask application. It initializes the API, manages authentication, and defines the available endpoints.
+
+## Key Features
+
+* **User Authentication** <br>
+* Uses HTTP Basic Authentication (flask_httpauth) to verify user credentials. <br>
+* Implements user registration and login endpoints. <br>
+
+* **Inventory Management** <br>
+* Retrieves the list of available furniture items from inventory. <br>
+
+* **Shopping Cart Operations** <br>
+* Allows users to add, view, and remove items from their shopping cart.<br>
+* Supports checkout functionality to place an order. <br>
+* Provides options to save and load cart data using CSV files.<br>
 
 ----------
 ----------
