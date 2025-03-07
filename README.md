@@ -156,14 +156,14 @@ The app.py file serves as the entry point for the Flask application. It initiali
 
 ## Key Features
 
-* **User Authentication** <br>
+**User Authentication** <br>
 * Uses HTTP Basic Authentication (flask_httpauth) to verify user credentials. <br>
 * Implements user registration and login endpoints. <br>
 
-* **Inventory Management** <br>
+**Inventory Management** <br>
 * Retrieves the list of available furniture items from inventory. <br>
 
-* **Shopping Cart Operations** <br>
+**Shopping Cart Operations** <br>
 * Allows users to add, view, and remove items from their shopping cart.<br>
 * Supports checkout functionality to place an order. <br>
 * Provides options to save and load cart data using CSV files.<br>
