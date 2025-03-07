@@ -30,9 +30,9 @@ This project aims to:
 
 ### 1. Furniture Management
 Base Classes: <br>
-1.*DiscountStrategy* (Inherits from ABC) <br> 
+1. *DiscountStrategy* (Inherits from ABC) <br> 
 This class defines different discount strategies that will be implemented later.
-It has one abstract method - get_discount() and 4 derived classes(when every derived class implements get_discount accordingly).
+It has one abstract method - get_discount() and 4 derived classes (when every derived class implements get_discount accordingly).
 To design this class, we used the Strategy Pattern.<br>
 2. *Furniture* (Inherits from ABC) <br>
 This class defines how a furniture instance looks like and relevant methods.
@@ -47,11 +47,11 @@ Other class methods: <br>
 
 - **Derived Classes:** <br>
         Chair, Table, Sofa, Bed, Wardrobe. <br>
-        To enforce type-specific discount calculations- each class has unique attributes and a custom implementation of the 2 @abstractmethods - calculate_discount() and apply_discount(). In addition, every type of furniture has a unique implementation of string presentation for its' specific details.
+        To enforce type-specific discount calculations - each class has unique attributes and a custom implementation of the 2 @abstractmethods - calculate_discount() and apply_discount(). In addition, every type of furniture has a unique implementation of string presentation for its' specific details.
         Example: Chairs with armrests receive an additional discount and have a method called chair_info() that returns its chair-specific details.<br>
 
 - **Data Structure Choice:** <br>
-        We used inheritance to ensure reusability and modularity, allowing for easy extension of new furniture types- We chose the Factory Pattern to support that -for this, we defined a class called FurnitureFactory to handle different inputs of furniture types.<br>
+        We used inheritance to ensure reusability and modularity, allowing for easy extension of new furniture types - We chose the Factory Pattern to support that - for this, we defined a class called FurnitureFactory to handle different inputs of furniture types.<br>
         
 ---------
 
@@ -61,6 +61,7 @@ Other class methods: <br>
 
 Stores all furniture items grouped by type in a dictionary (items_by_type dictionary of dictionaries). <br>
 Supports efficient lookups, updates, and search functionality. <br>
+Attributes: items_by_type, observers.
 
 - **Key Methods:** <br>
         add_item: Adds items to the inventory, grouped by their type.<br>
@@ -109,7 +110,7 @@ Attributes: name, email, password (hashed), address, wishlist, order_history. <b
 Attributes: user, cart_items.
 
 - **Key Methods:**<br>
-        add_item and remove_item: Manage items in the cart. <br>
+        add_item and remove_item: Manage items in the cart.<br>
         calculate_total: Computes the total price before discounts.<br>
         apply_discount: Applies type-specific discounts and cart-wide promotional discounts.<br>
         checkout: Validates items, processes payment (mocked), and finalizes the order.<br>
@@ -133,7 +134,7 @@ Attributes: user, cart_items.
 
 **Class: Order**
 
-Attributes: order_id, user, items (the dictionary of ordered items) , total_price, status.
+Attributes: order_id, user, items (the dictionary of ordered items), total_price, status.
 
 
 - **Key Features:** <br>
