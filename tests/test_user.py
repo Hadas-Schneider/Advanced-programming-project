@@ -350,5 +350,6 @@ class TestUser(unittest.TestCase):
         # Verify no user was returned
         self.assertIsNone(user)
 
+
 if __name__ == '__main__':
     unittest.main()
