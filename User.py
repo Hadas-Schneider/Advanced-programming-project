@@ -235,7 +235,7 @@ class User:
                         user.wishlist = wishlist.split("|") if wishlist else []
                         return user  # Return the matched user
 
-        except  ValueError:
+        except ValueError:
             print("User not found.")
         except FileNotFoundError:
             print("File not found")

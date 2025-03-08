@@ -6,6 +6,7 @@ from unittest.mock import patch, MagicMock
 from User import User, ProfileUpdateNotifier
 from order import Order  # Assuming Order is a valid class with necessary attributes
 
+
 class TestUser(unittest.TestCase):
 
     def setUp(self):
@@ -111,8 +112,8 @@ class TestUser(unittest.TestCase):
 
         # Verify the correct data was written
         expected_rows = [
-            ["name", "email", "password", "salt", "hashed_password", "address", "payment_method", "order_history",
-                 "wishlist"],
+            ["name", "email", "password", "salt", "hashed_password", "address", "payment_method",
+             "order_history", "wishlist"],
             ["Avi Cohen", "avicohen@example.com", "Strong@123", self.user.salt, self.user.hashed_password,
              "123 Main St", "PayPal", None, None]
         ]
