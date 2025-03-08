@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from furniture import Furniture
+from typing import Optional
 
 
 class InventoryObserver(ABC):
@@ -46,6 +47,19 @@ class Inventory:
         for observer in self.observers:
             observer.update(item, change_type)
 
+    def get_furniture_type(self, item_name: str) -> Optional[str]:
+        """
+        Get the furniture type based on the item name.
+        This function searches through the inventory and returns the type.
+        param item_name: The name of the furniture item.
+        return: The furniture type if found, otherwise None.
+        """
+
+        for furniture_type, items in self.items_by_type.items():
+            if item_name in items:
+                return furniture_type
+        return None
+
     def add_item(self, item: Furniture):
         """
         Add a furniture item to the inventory or update its quantity if it already exists.
@@ -75,19 +89,23 @@ class Inventory:
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
 
-    def update_quantity(self, name: str, furniture_type: str, quantity: int):
+    def update_quantity(self, name: str, furniture_type: str, new_quantity: int) -> bool:
         """
         Update the available quantity of a specific furniture item.
 
         param name: Name of the furniture item to update.
         param furniture_type: Type of the furniture item (e.g., "Chair", "Table").
-        param quantity: New quantity to set for the item.
+        param new_quantity: New quantity to set for the item.
         """
         if furniture_type in self.items_by_type and name in self.items_by_type[furniture_type]:
-            self.items_by_type[furniture_type][name].available_quantity = quantity
+            self.items_by_type[furniture_type][name].available_quantity = new_quantity
+
             self.notify_observers(self.items_by_type[furniture_type][name], "updated")
+            print(f" Successfully updated {name} to quantity {new_quantity}")
+            return True
         else:
             print(f"Item '{name}' of type '{furniture_type}' not found in inventory.")
+            return False
 
     def search_by_type(self, furniture_type: str):
         """

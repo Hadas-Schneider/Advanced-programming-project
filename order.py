@@ -1,6 +1,7 @@
 import uuid
 import csv
 import os
+import sys
 
 
 class Order:
@@ -44,14 +45,18 @@ class Order:
         """
         String representation of the order.
         """
-        items_str = ", ".join([f"{item.name} x {quantity}" for item, quantity in self.items.items()])
+        items_str = ", ".join([f"{name} x {quantity}" for name, quantity, price in self.items])
         return (f"Order {self.order_id}: {items_str} | Total: ${self.total_price:.2f} | Status: {self.status} | "
                 f"Shipping to: {self.shipping_address} | Payment method: {self.payment_method}")
 
-    def save_order_to_csv(self, filename="orders.csv"):
+    def save_order_to_csv(self, filename=None):
         """
         Save Order details to a CSV file.
         """
+        if filename is None:
+            filename = "test_orders.csv" if "pytest" in sys.modules else "orders.csv"
+        print(f"Saving order to {filename}")
+
         file_exists = os.path.exists(filename)
         with open(filename, mode="a", newline="") as file:
             writer = csv.writer(file)
@@ -59,15 +64,13 @@ class Order:
                 writer.writerow(["order_id", "user_email", "shipping_address", "payment_method",
                                  "items", "total_price", "status"])
 
-            items_str = "|".join([
-                f"{item.name} x {quantity} (${item.price:.2f})"
-                for item, quantity in self.items.items()
-            ])
+            items_str = "|".join([f"{name} x {quantity} (${price:.2f})"
+                                  for name, quantity, price in self.items])
 
-            writer.writerow([
-                self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
-                f"${self.total_price:.2f}", self.status
-            ])
+            writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
+                            f"${self.total_price:.2f}", self.status])
+
+        print(f"Order saved successfully to {filename}.")
 
     @staticmethod
     def load_orders_from_csv(filename="orders.csv"):

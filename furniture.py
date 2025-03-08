@@ -53,7 +53,7 @@ class Furniture(ABC):
         param available_quantity : int representing the current available quantity of the item.
         param country: Where the furniture from.
         param type: str representing the item's type.
-        param discount_strategy : representing the discount the item should have.
+        param discount_strategy : representing the discount the item should have( the default is No Discount).
 
         """
         self.u_id = u_id
@@ -64,8 +64,8 @@ class Furniture(ABC):
         self.wp = wp
         self.price = price
         self.dimensions = dimensions
-        self.available_quantity = available_quantity
         self.country = country
+        self.available_quantity = available_quantity
         self.type = "Generic"
         self.discount_strategy = discount_strategy
 
@@ -77,7 +77,7 @@ class Furniture(ABC):
         pass
 
     @abstractmethod
-    def apply_discount(self, discount: float) -> float:
+    def apply_discount(self, discount: DiscountStrategy) -> float:
         pass
 
     @staticmethod
@@ -93,7 +93,10 @@ class Furniture(ABC):
 
         return: True if available_quantity > 0, otherwise False.
         """
-        return self.available_quantity > 0
+        if self.available_quantity < 1:
+            print(f"Sorry, item '{self.name}' not in stock.")
+            return False
+        return True
 
 
 # Derived Furniture Classes
@@ -101,7 +104,6 @@ class Chair(Furniture):
     """
     Represents a Chair.
     """
-
     def __init__(self, u_id: str, name: str, description: str, material: str, color: str, wp: int,
                  price: float, dimensions: tuple, country: str, available_quantity: int, has_armrests: bool):
         """

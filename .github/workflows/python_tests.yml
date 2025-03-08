@@ -5,9 +5,9 @@ name: Python Tests
 
 on:
   push:
-    branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory" ]
+    branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory", "feature/shopping_cart", "feature/shopping_cart_copy" ]
   pull_request:
-    branches: [ "Classes" ]
+    branches: [ "Classes"]
 
 jobs:
   build:
@@ -29,6 +29,11 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install -r requirements.txt
+        python -m pip install flask-httpauth
+        pip list
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
     - name: Tests
       env:
