@@ -14,15 +14,6 @@ class TestOrder(unittest.TestCase):
         self.mock_user.payment_method = "Credit card"
         self.mock_user.email = "test@example.com"
 
-        class Furniture:
-            def __init__(self, name, price):
-                self.name = name
-                self.price = price
-
-        chair = Furniture("Chair", 20)
-        table = Furniture("Table", 80)
-        bed = Furniture("Bed", 100)
-
         self.items = [("Chair", 2, 20.00), ("Table", 1, 80.00), ("Bed", 1, 100.00)]
         self.total_price = 200
 

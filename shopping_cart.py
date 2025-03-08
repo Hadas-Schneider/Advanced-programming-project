@@ -297,7 +297,7 @@ class ShoppingCart:
 
             for row in reader:
                 if row and row[0] == self.user.email:
-                    item_name, quantity, price = row[1], int(row[2]), float(row[3])
+                    item_name, quantity = row[1], int(row[2])
                     furniture_type = self.inventory.get_furniture_type(item_name)
 
                     if furniture_type:
