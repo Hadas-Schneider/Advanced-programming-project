@@ -55,7 +55,7 @@ class Order:
         """
         if filename is None:
             filename = "test_orders.csv" if "pytest" in sys.modules else "orders.csv"
-        print(f"📄 Saving order to {filename}")
+        print(f"Saving order to {filename}")
 
         file_exists = os.path.exists(filename)
         with open(filename, mode="a", newline="") as file:
@@ -69,6 +69,8 @@ class Order:
 
             writer.writerow([self.order_id, self.user.email, self.shipping_address, self.payment_method, items_str,
                             f"${self.total_price:.2f}", self.status])
+
+        print(f"Order saved successfully to {filename}.")
 
     @staticmethod
     def load_orders_from_csv(filename="orders.csv"):

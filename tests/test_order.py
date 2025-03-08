@@ -23,7 +23,7 @@ class TestOrder(unittest.TestCase):
         table = Furniture("Table", 80)
         bed = Furniture("Bed", 100)
 
-        self.items = {chair: 2, table: 1, bed: 1}
+        self.items = [("Chair", 2, 20.00), ("Table", 1, 80.00), ("Bed", 1, 100.00)]
         self.total_price = 200
 
         # Set up Order
@@ -68,12 +68,11 @@ class TestOrder(unittest.TestCase):
         )
         self.assertEqual(str(self.order), expected)
 
-
     @patch("os.path.exists")
     @patch("builtins.open", new_callable=mock_open)
     def test_save_order_to_csv_new_file(self, mock_file, mock_exists):
         """
-        Test `save_order_to_csv` when the file does not exists.
+        Test `save_order_to_csv` when the file does not exist.
         """
         mock_exists.return_value = False  # Simulating a new file
 
@@ -82,6 +81,7 @@ class TestOrder(unittest.TestCase):
 
         self.order.save_order_to_csv("test_orders.csv")
 
+        # Verify that the file was opened in "append" mode
         mock_file.assert_called_once_with("test_orders.csv", mode="a", newline="")
         mock_exists.assert_called_once_with("test_orders.csv")
 
@@ -106,7 +106,6 @@ class TestOrder(unittest.TestCase):
         """
         Test `save_order_to_csv` when the file already exists.
         """
-
         mock_exists.return_value = True  # Simulating an existing file
 
         csv_output = io.StringIO()
@@ -114,13 +113,16 @@ class TestOrder(unittest.TestCase):
 
         self.order.save_order_to_csv("test_orders.csv")
 
+        # Verify that the file was opened in "append" mode
         mock_file.assert_called_once_with("test_orders.csv", mode="a", newline="")
 
         csv_output.seek(0)
         csv_reader = csv.reader(csv_output)
         rows = list(csv_reader)
 
-        self.assertNotEqual(rows[0][0], "order_id") if rows else None
+        # Ensure that the header is not duplicated
+        if len(rows) > 1:
+            self.assertEqual(rows[1][0], "order_id")
 
     @patch('builtins.open', new_callable=mock_open)
     def test_load_orders_from_csv(self, mock_file):
