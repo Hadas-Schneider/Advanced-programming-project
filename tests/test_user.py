@@ -1,10 +1,10 @@
 import unittest
 import csv
 import io
-from unittest.mock import patch
+from io import StringIO
+from unittest.mock import patch, MagicMock
 from User import User, ProfileUpdateNotifier
 from order import Order  # Assuming Order is a valid class with necessary attributes
-
 
 class TestUser(unittest.TestCase):
 
@@ -93,83 +93,261 @@ class TestUser(unittest.TestCase):
 
         self.assertIn("User Observer Test updated their profile.", output)
 
-    def test_save_new_to_csv(self):
-        """Test that the user is correctly saved to the CSV file."""
-        # Ensure the user instance is saved to the file
+    @patch('builtins.open')
+    def test_save_to_csv_new_file(self, mock_open_func):
+        """Test saving user to a new CSV file that doesn't exist yet"""
+        # Mock the file not existing
+        mock_open_func.side_effect = [
+            FileNotFoundError,  # First open() call raises FileNotFoundError
+            MagicMock()  # Second open() call for writing returns a file-like object
+        ]
+
+        # Set up the mock for CSV writer
+        mock_writer = MagicMock()
+        csv.writer = MagicMock(return_value=mock_writer)
+
+        # Call the method
         self.user.save_to_csv(self.test_filename)
 
-        # Read the last row of the file
-        with open(self.test_filename, mode="r") as file:
-            reader = csv.reader(file)
-            rows = list(reader)
-
-        expected_data = [
-            self.user.name,
-            self.user.email,
-            self.user.password,
-            self.user.salt,
-            self.user.hashed_password,
-            self.user.address,
-            self.user.payment_method,
-            "",
-            ""
+        # Verify the correct data was written
+        expected_rows = [
+            ["name", "email", "password", "salt", "hashed_password", "address", "payment_method", "order_history",
+                 "wishlist"],
+            ["Avi Cohen", "avicohen@example.com", "Strong@123", self.user.salt, self.user.hashed_password,
+             "123 Main St", "PayPal", None, None]
         ]
+        mock_writer.writerows.assert_called_once_with(expected_rows)
 
-        self.assertEqual(rows[-1], expected_data)  # Check last row matches user data
-
-    def test_load_from_csv(self):
-        """Test that the user is correctly loaded from the CSV file."""
-        loaded_user = User.load_from_csv(self.test_filename, "Avi Cohen", "avicohen@example.com",
-                                         "123 Main St")
-
-        self.assertEqual(loaded_user.name, self.user.name)
-        self.assertEqual(loaded_user.email, self.user.email)
-        self.assertEqual(loaded_user.address, self.user.address)
-        self.assertEqual(loaded_user.payment_method, self.user.payment_method)
-        self.assertEqual(loaded_user.order_history, self.user.order_history)  # Assuming empty at start
-        self.assertEqual(loaded_user.wishlist, self.user.wishlist)  # Assuming empty at start
-
-    def test_save_exists_to_csv(self):
-        """Test that existing user is correctly saved to the CSV file after changes."""
-        # Ensure the user instance is saved to the file
-        existing_user = User.load_from_csv(
-            self.test_filename, "Avi Cohen", "avicohen@example.com", "123 Main St"
+    @patch('builtins.open')
+    def test_save_to_csv_update_existing_user(self, mock_open_func):
+        """Test updating an existing user in the CSV file"""
+        # Create a mock file with existing data
+        existing_data = (
+            "name,email,password,salt,hashed_password,address,payment_method,order_history,wishlist\n"
+            "Avi Cohen,avicohen@example.com,old_password,old_salt,old_hash,old_address,old_payment,OldOrder,OldItem\n"
         )
-        existing_user.update_profile(address="456 Elm St")
-        order = Order(user=existing_user, items={"Table": 1, "Chair": 1}, total_price=200)
-        existing_user.add_order_to_history(order)
-        existing_user.save_to_csv(self.test_filename)
+        mock_file = StringIO(existing_data)
 
-        # Read the relevant row in the file
-        with open(self.test_filename, mode="r") as file:
-            reader = csv.reader(file)
-            rows = list(reader)
-
-        expected_data = [
-            existing_user.name,
-            existing_user.email,
-            existing_user.password,
-            existing_user.salt,
-            existing_user.hashed_password,
-            existing_user.address,
-            existing_user.payment_method,
-            "Table x 1, Chair x 1",
-            ""
+        # First open is for reading, returns our StringIO with data
+        # Second open is for writing, returns a MagicMock
+        mock_open_context = [
+            mock_file,
+            MagicMock()
         ]
 
-        # Find the row that contains the user's email
-        user_row = None
-        for row in rows:
-            if row[1] == existing_user.email:  # Assuming email is at index 1
-                user_row = row
-                break  # Stop once we find the correct row
+        # Configure mock_open to return different file handles
+        mock_open_func.side_effect = lambda filename, mode, newline="": mock_open_context.pop(0)
 
-        # Ensure we found a matching row
-        self.assertIsNotNone(user_row, "User record not found in CSV file.")
+        # Set up the mock for CSV writer
+        mock_writer = MagicMock()
+        csv.writer = MagicMock(return_value=mock_writer)
 
-        # Compare the expected data with the found row
-        self.assertEqual(user_row, expected_data)
+        # Call the method
+        self.user.save_to_csv(self.test_filename)
 
+        # Verify the correct data was written
+        expected_rows = [
+            ["name", "email", "password", "salt", "hashed_password", "address", "payment_method", "order_history",
+             "wishlist"],
+            ["Avi Cohen", "avicohen@example.com", "Strong@123", self.user.salt, self.user.hashed_password,
+             "123 Main St", "PayPal", None, None]
+        ]
+        mock_writer.writerows.assert_called_once_with(expected_rows)
+
+    @patch('builtins.open')
+    def test_save_to_csv_add_new_user(self, mock_open_func):
+        """Test adding a new user to an existing CSV file with other users"""
+        # Create a mock file with existing data (different user)
+        existing_data = (
+            "name,email,password,salt,hashed_password,address,payment_method,order_history,wishlist\n"
+            "Jane Smith,jane@example.com,pwd,salt,hash,address,payment,Order,Item\n"
+        )
+        mock_file = StringIO(existing_data)
+
+        # Configure mock_open
+        mock_open_context = [
+            mock_file,
+            MagicMock()
+        ]
+        mock_open_func.side_effect = lambda filename, mode, newline="": mock_open_context.pop(0)
+
+        # Set up the mock for CSV writer
+        mock_writer = MagicMock()
+        csv.writer = MagicMock(return_value=mock_writer)
+
+        # Call the method
+        self.user.save_to_csv(self.test_filename)
+
+        # Verify the correct data was written
+        expected_rows = [
+            ["name", "email", "password", "salt", "hashed_password", "address", "payment_method", "order_history",
+             "wishlist"],
+            ["Jane Smith", "jane@example.com", "pwd", "salt", "hash", "address", "payment", "Order", "Item"],
+            ["Avi Cohen", "avicohen@example.com", "Strong@123", self.user.salt, self.user.hashed_password,
+             "123 Main St", "PayPal", None, None]
+        ]
+        mock_writer.writerows.assert_called_once_with(expected_rows)
+
+    @patch('builtins.open')
+    def test_file_permission_error(self, mock_open_func):
+        """Test handling of permission errors during file operations"""
+        mock_open_func.side_effect = PermissionError("Permission denied")
+
+        with self.assertRaises(PermissionError):
+            self.user.save_to_csv(self.test_filename)
+
+    @patch('csv.reader')
+    @patch('csv.writer')
+    @patch('builtins.open')
+    def test_csv_processing_error(self, mock_open_func, mock_writer, mock_reader):
+        """Test handling of CSV processing errors"""
+        # Create a mock file object that will be returned when open() is called
+        mock_file = MagicMock()
+        # Configure the mock_open_func to return the mock_file when used in a with statement
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Configure the csv.reader mock to raise a csv.Error when called
+        # This simulates a CSV processing failure
+        mock_reader.side_effect = csv.Error("CSV processing error")
+
+        # Assert that a csv.Error exception is raised when the save_to_csv method is called
+        # This verifies that the exception from csv.reader is properly propagated
+        with self.assertRaises(csv.Error):
+            self.user.save_to_csv(self.test_filename)
+
+    @patch('builtins.open')
+    def test_load_from_csv_user_found(self, mock_open_func):
+        """Test loading a user that exists in the CSV file"""
+        # Create mock CSV data with the user we want to find
+        mock_csv_data = (
+            "Avi Cohen,avicohen@example.com,Strong@123,salt123,hashed_pwd_123,123 Main St,PayPal,Order1|Order2,Item1|Item2\n"
+        )
+        mock_file = StringIO(mock_csv_data)
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify the returned user has the correct attributes
+        self.assertIsNotNone(user)
+        self.assertEqual(user.name, self.user.name)
+        self.assertEqual(user.email, self.user.email)
+        self.assertEqual(user.password, "Strong@123")
+        self.assertEqual(user.salt, "salt123")
+        self.assertEqual(user.hashed_password, "hashed_pwd_123")
+        self.assertEqual(user.address, self.user.address)
+        self.assertEqual(user.payment_method, "PayPal")
+        self.assertEqual(user.order_history, ["Order1", "Order2"])
+        self.assertEqual(user.wishlist, ["Item1", "Item2"])
+
+    @patch('builtins.open')
+    def test_load_from_csv_user_not_found(self, mock_open_func):
+        """Test loading a user that doesn't exist in the CSV file"""
+        # Create mock CSV data without the user we're looking for
+        mock_csv_data = (
+            "Jane Smith,jane@example.com,pwd123,salt456,hashed_pwd_456,456 Oak St,CreditCard,Order3,Item3\n"
+        )
+        mock_file = StringIO(mock_csv_data)
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify no user was returned
+        self.assertIsNone(user)
+
+    @patch('builtins.open')
+    def test_load_from_csv_empty_file(self, mock_open_func):
+        """Test loading from an empty CSV file"""
+        # Create an empty mock CSV file
+        mock_file = StringIO("")
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify no user was returned
+        self.assertIsNone(user)
+
+    @patch('builtins.open')
+    def test_load_from_csv_missing_fields(self, mock_open_func):
+        """Test loading a user with missing fields (fewer than expected columns)"""
+        # Create mock CSV data with missing fields
+        mock_csv_data = (
+            "Avi Cohen,avicohen@example.com,Strong@123\n"  # Missing several fields
+        )
+        mock_file = StringIO(mock_csv_data)
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Mock print to capture the error message
+        with patch('builtins.print') as mock_print:
+            # Call the method
+            user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+            # Verify the error was printed and no user was returned
+            mock_print.assert_called_with("User not found.")
+            self.assertIsNone(user)
+
+    @patch('builtins.open')
+    def test_load_from_csv_empty_collections(self, mock_open_func):
+        """Test loading a user with empty order history and wishlist"""
+        # Create mock CSV data with empty collections
+        mock_csv_data = (
+            "Avi Cohen,avicohen@example.com,Strong@123,salt123,hashed_pwd_123,123 Main St,PayPal,,\n"
+        )
+        mock_file = StringIO(mock_csv_data)
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify the user has empty lists for the collections
+        self.assertIsNotNone(user)
+        self.assertEqual(user.order_history, [])
+        self.assertEqual(user.wishlist, [])
+
+    @patch('builtins.open')
+    def test_load_from_csv_file_not_found(self, mock_open_func):
+        """Test handling of file not found error"""
+        # Mock a file not found error
+        mock_open_func.side_effect = FileNotFoundError("File not found")
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify no user was returned
+        self.assertIsNone(user)
+
+    @patch('builtins.open')
+    @patch('builtins.print')
+    def test_load_from_csv_csv_error(self, mock_print, mock_open_func):
+        """Test handling of CSV parsing error"""
+        # Create a mock file that will cause a ValueError when unpacked
+        # This simulates a CSV row with incorrect number of fields
+        mock_csv_data = (
+            "Avi Cohen,avicohen@example.com\n"  # Not enough fields to unpack
+        )
+        mock_file = StringIO(mock_csv_data)
+        mock_open_func.return_value.__enter__.return_value = mock_file
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify error was printed and no user was returned
+        mock_print.assert_called_with("User not found.")
+        self.assertIsNone(user)
+
+    @patch('builtins.open')
+    def test_load_from_csv_permission_error(self, mock_open_func):
+        """Test handling of permission error"""
+        # Mock a permission error
+        mock_open_func.side_effect = PermissionError("Permission denied")
+
+        # Call the method
+        user = User.load_from_csv(self.test_filename, self.user.name, self.user.email, self.user.address)
+
+        # Verify no user was returned
+        self.assertIsNone(user)
 
 if __name__ == '__main__':
     unittest.main()
