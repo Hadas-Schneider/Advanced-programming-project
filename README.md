@@ -10,15 +10,15 @@ This project aims to:
 
 * Simulate an e-commerce application for managing and selling furniture.
 * Demonstrate the use of Python's OOP features, design patterns, and clean coding principles.
-* Optimize data structures for efficient inventory and user management.
-<br> The application is divided into the following components:
+
+<br> The application includes the following features:
 <br>
 - Furniture Management <br>
 - Inventory System <br>
 - User Management <br>
 - Shopping Cart <br>
 - Order Management<br>
-- API Integration <br>
+- REST API for communication <br>
 
 
 ------------------
