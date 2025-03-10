@@ -1,0 +1,46 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python Tests
+
+on:
+  push:
+    branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory", "feature/shopping_cart", "feature/shopping_cart_copy" ]
+  pull_request:
+    branches: [ "Classes", "main"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install -r requirements.txt
+        python -m pip install flask-httpauth
+        pip list
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+
+    - name: Tests
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+      run: |
+        pytest tests -v
+
+
+    
+      
