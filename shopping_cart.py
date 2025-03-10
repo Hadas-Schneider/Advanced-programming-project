@@ -286,16 +286,19 @@ class ShoppingCart:
         self.cart_items = {}
         with open(filename, mode="r", newline="") as file:
             reader = csv.reader(file)
-            for row in reader:
-                print("Reading row:", row)
-            headers = next(reader, None)  # Skip the headlines row
+
+            # Read headers first
+            headers = next(reader, None)
+            print("Headers:", headers)
 
             expected_header = ["user_email", "item_name", "quantity", "price"]
             if headers != expected_header:
                 print(f"Incorrect CSV header detected while loading. Expected {expected_header}, but got {headers}.")
                 return
 
+            # Process data rows
             for row in reader:
+                print("Reading row:", row)
                 if row and row[0] == self.user.email:
                     item_name, quantity = row[1], int(row[2])
                     furniture_type = self.inventory.get_furniture_type(item_name)
