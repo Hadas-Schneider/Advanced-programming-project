@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory", "feature/shopping_cart", "feature/shopping_cart_copy" ]
   pull_request:
-    branches: [ "Classes"]
+    branches: [ "Classes", "main"]
 
 jobs:
   build:
