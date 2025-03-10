@@ -1,4 +1,3 @@
-import datetime
 import jwt
 import json
 import atexit
@@ -606,7 +605,7 @@ def view_orders():
         print(" No orders found")
         return jsonify({"message": "No orders found"}), 404
 
-    print("🟢 Returning orders data")
+    print("Returning orders data")
     return jsonify({"orders": list(orders.values())}), 200
 
 

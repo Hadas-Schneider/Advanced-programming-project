@@ -1,4 +1,3 @@
-from io import StringIO
 import unittest
 from unittest.mock import mock_open, patch, MagicMock
 from shopping_cart import ShoppingCart
@@ -442,7 +441,8 @@ class TestShoppingCart(unittest.TestCase):
             called_with_error_msg = False
             for call_args in mock_print.call_args_list:
                 call_str = str(call_args)
-                if "Incorrect CSV header" in call_str and "Expected" in call_str and "invalid" in call_str and "header" in call_str and "format" in call_str:
+                if "Incorrect CSV header" in call_str and "Expected" in call_str and "invalid" in call_str and "header"\
+                        in call_str and "format" in call_str:
                     called_with_error_msg = True
                     break
 

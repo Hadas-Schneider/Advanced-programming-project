@@ -1,7 +1,7 @@
 import pytest
 import base64
 import os
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 from app1 import app, users, orders, get_jwt_token, inventory, users_roles, save_users_json
 from User import User
 from furniture import Chair
@@ -507,4 +507,3 @@ def test_client_cannot_access_admin(client, create_test_user):
 #     assert "cart" in response.json, "Cart data not found in response!"
 #
 #     mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")
-
