@@ -5,7 +5,7 @@ name: Python Tests
 
 on:
   push:
-    branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory", "feature/shopping_cart", "feature/shopping_cart_copy" ]
+    branches: [ "feature/discount", "feature/order", "feature/user", "feature/inventory", "feature/shopping_cart", "feature/shopping_cart_copy", "main" ]
   pull_request:
     branches: [ "Classes", "main"]
 
