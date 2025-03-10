@@ -2,7 +2,7 @@ import pytest
 import base64
 import os
 from unittest.mock import patch, MagicMock
-from app1 import app, users, orders, get_jwt_token, inventory, users_roles, save_users_json
+from app import app, users, orders, get_jwt_token, inventory, users_roles, save_users_json
 from User import User
 from furniture import Chair
 from shopping_cart import ShoppingCart
