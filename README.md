@@ -154,27 +154,32 @@ Supports efficient lookups, updates, and search functionality.<br><br>
 ### 6. API 
 
 The app.py file serves as the entry point for the Flask application. It initializes the API, manages authentication, and defines the available endpoints: <br>
+- /furniture
+- /furniture/search
 - /user/register
 - /user/login
 - /cart/view
 - /cart/update
 - /cart/remove
 - /cart/checkout
-- /furniture
+- /admin/inventory/manage
+- /admin/orders
+- /admin/manage_users
 
 ## Key Features
+**User Authentication ** <br>
+It uses JWT Token Authentication (flask_httpauth) to verify user credentials(according to 2 kinds of users- clients and admins). <br>
 
-**User Authentication** <br>
-* Uses HTTP Basic Authentication (flask_httpauth) to verify user credentials. <br>
-* Implements user registration and login endpoints. <br>
+**Public Endpoints like authentication and Inventory Management** <br>
+It includes basic endopints that are open for free use on the API such as user registration and login endpoints and also viewing the store's furniture catalog and searching a furniture item enpoints. <br>
 
-**Inventory Management** <br>
-* Retrieves the list of available furniture items from inventory. <br>
+**Endpoints open for registered clients and Shopping Cart Operations** <br>
+* Clients that are already logged in to the site can view their latest cart they assembled, add or remove items from it. Of course this includes purchasing the items on the cart by the Checkout process. The API Provides options to save to CSV files and to also be able to load it from the CSV when needed . <br>
 
-**Shopping Cart Operations** <br>
-* Allows users to add, view, and remove items from their shopping cart.<br>
-* Supports checkout functionality to place an order. <br>
-* Provides options to save and load cart data using CSV files.<br>
+**Endpoints for admins** <br>
+*Allow admins to add ,remove and basically update items' inventory on their site and to notify its observers when needed.<br>
+*Allow admins to view the clients' orders history <br>
+*Allow admins to manage their users' data- this includes showing the data of users, update/remove certain users and to notify its observers when needed.<br>
 
 ----------
 ----------
