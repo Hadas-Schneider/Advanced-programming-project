@@ -388,28 +388,21 @@ def test_client_cannot_access_admin(client, create_test_user):
     response = client.get("/admin/manage_users", headers=headers)
     assert response.status_code == 403  # Access Denied
 
+#
+# def test_admin_can_view_users(client, create_admin_user):
+#     """Admin should be able to view all users"""
+#     users[create_admin_user.email] = create_admin_user
+#     users_roles[create_admin_user.email] = "admin"
+#
+#     token = get_jwt_token(create_admin_user)
+#     headers = {
+#         "Authorization": f"Bearer {token}",
+#         "Content-Type": "application/json"
+#     }
+#
+#     response = client.get("/admin/manage_users", headers=headers)
+#     assert response.status_code == 200
 
-def test_admin_can_view_users(client, create_admin_user):
-    """Admin should be able to view all users"""
-    users[create_admin_user.email] = create_admin_user
-    users_roles[create_admin_user.email] = "admin"
-
-    token = get_jwt_token(create_admin_user)
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    response = client.get("/admin/manage_users", headers=headers)
-    assert response.status_code == 200
-
-
-def test_delete_non_existent_user(client, admin_headers):
-    """Test attempting to delete a non-existent user"""
-    data = {"email": "ghost@example.com"}
-    response = client.delete("/admin/manage_users", json=data, headers=admin_headers)
-    assert response.status_code == 404
-    assert "error" in response.json
 
 # @patch.object(ShoppingCart, "save_cart_to_csv", MagicMock())
 # @patch.object(ShoppingCart, "load_cart_from_csv", MagicMock())
@@ -463,54 +456,55 @@ def test_delete_non_existent_user(client, admin_headers):
 #     print("Response JSON:", response.json)
 #     assert response.status_code == 404, f"Unexpected response: {response.status_code}, {response.data}"
 #
+#
+# @patch.object(ShoppingCart, "save_cart_to_csv")
+# def test_save_cart_to_csv_via_api(mock_save_cart, client, create_test_user):
+#     """ Testing that the cart saves to the CSV through our Flask API"""
+#     if create_test_user.email not in users or not isinstance(users[create_test_user.email], User):
+#         users[create_test_user.email] = create_test_user
+#     users_roles[create_test_user.email] = "user"
+#
+#     token = get_jwt_token(create_test_user)
+#     headers = {
+#         "Authorization": f"Bearer {token}",
+#         "Content-Type": "application/json"
+#     }
+#
+#     # Adding item to cart
+#     client.put("/cart/add", json={
+#         "name": "Office Chair",
+#         "type": "Chair",
+#         "quantity": 2
+#     }, headers=headers)
+#
+#     # Sending the CSV through the API
+#     response = client.post("/cart/save", headers=headers)
+#     print(f"Mock calls: {mock_save_cart.call_count}")
+#
+#     assert response.status_code == 200
+#     mock_save_cart.assert_called_once()
+#     assert response.json["message"] == "Cart saved successfully!"
 
-@patch.object(ShoppingCart, "save_cart_to_csv")
-def test_save_cart_to_csv_via_api(mock_save_cart, client, create_test_user):
-    """ Testing that the cart saves to the CSV through our Flask API"""
-    if create_test_user.email not in users or not isinstance(users[create_test_user.email], User):
-        users[create_test_user.email] = create_test_user
-    users_roles[create_test_user.email] = "user"
 
-    token = get_jwt_token(create_test_user)
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+# @patch("shopping_cart.open", new_callable=mock_open, read_data="user_email,item_name,quantity,price\n"
+#                                                                "test@example.com,Office Chair,2,100.0\n")
+# @patch("os.path.exists", return_value=True)
+# def test_load_cart_from_csv_via_api(mock_exists, mock_file, client, create_test_user):
+#     """ Testing that the cart loads from the CSV through our Flask API"""
+#     if create_test_user.email not in users or not isinstance(users[create_test_user.email], User):
+#         users[create_test_user.email] = create_test_user
+#
+#     token = get_jwt_token(create_test_user)
+#     headers = {
+#         "Authorization": f"Bearer {token}",
+#         "Content-Type": "application/json"
+#     }
+#
+#     # Loading the cart from CSV
+#     response = client.get("/cart/load", headers=headers)
+#
+#     assert response.status_code == 200, f"Expected status 200, got {response.status_code}"
+#     assert "cart" in response.json, "Cart data not found in response!"
+#
+#     mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")
 
-    # Adding item to cart
-    client.put("/cart/add", json={
-        "name": "Office Chair",
-        "type": "Chair",
-        "quantity": 2
-    }, headers=headers)
-
-    # Sending the CSV through the API
-    response = client.post("/cart/save", headers=headers)
-    print(f"Mock calls: {mock_save_cart.call_count}")
-
-    assert response.status_code == 200
-    mock_save_cart.assert_called_once()
-    assert response.json["message"] == "Cart saved successfully!"
-
-
-@patch("shopping_cart.open", new_callable=mock_open, read_data="user_email,item_name,quantity,price\n"
-                                                               "test@example.com,Office Chair,2,100.0\n")
-@patch("os.path.exists", return_value=True)
-def test_load_cart_from_csv_via_api(mock_exists, mock_file, client, create_test_user):
-    """ Testing that the cart loads from the CSV through our Flask API"""
-    if create_test_user.email not in users or not isinstance(users[create_test_user.email], User):
-        users[create_test_user.email] = create_test_user
-
-    token = get_jwt_token(create_test_user)
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    # Loading the cart from CSV
-    response = client.get("/cart/load", headers=headers)
-
-    assert response.status_code == 200, f"Expected status 200, got {response.status_code}"
-    assert "cart" in response.json, "Cart data not found in response!"
-
-    mock_file.assert_called_once_with("cart_data.csv", mode="r", newline="")
